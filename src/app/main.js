@@ -11,16 +11,13 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
     editor.setValue(`% Noninertial rules
     noninertial fleeing
     -fleeing after -alive or dead
-    -fleeing after (-alive or dead)
     -scared after LOAD, ATTACK
-    -scared after LOAD, -alive
 
     % Initial state
-    initially alive, -dead
+    initially alive
 
     % Prohibition statements 
     impossible LOAD by deer
-    impossible if loaded by deer
 
     % Action statements
     LOAD causes loaded by hunter
@@ -33,8 +30,10 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
     ATTACK by hunter and (andog or fox)`.replace(/\n[ ]*/g, '\n'), -1)
 
     let lastTimeout = null;
+    let ignoreNext = false;
     editor.session.on('change', function (delta) {
         if (lastTimeout) clearTimeout(lastTimeout);
+        if (ignoreNext) { return }
         lastTimeout = setTimeout(formatProgram, 3500);
     });
 
@@ -80,8 +79,34 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
     getParsedProgram = formatProgram;
     function formatProgram() {
         var result = parseProgram();
-        console.log(result)
-        // TODO: format program based on result
+        var formatted = '';
+
+        formatted += '% Initial state\n';
+        if (result.initial_state.size > 0) formatted += 'initially ' + [...result.initial_state].join(', ') + '\n';
+
+        formatted += '\n% Noninertial rules\n';
+        if (result.noninertial_fluents.size > 0) formatted += 'noninertial ' + [...result.noninertial_fluents].join(', ') + '\n';
+        formatted += result.noninertial_rules_fluents.map(r => r.fluent + ' after ' + r.condition).join('\n') + '\n';
+        formatted += result.noninertial_rules_actions.map(r => r.fluent + ' after ' + r.actions.join(', ')).join('\n') + '\n';
+
+        formatted += '\n% Prohibition statements\n';
+        formatted += result.prohibitions.map(r => 'impossible ' + r.action + (r.conditions ? ' if ' + r.conditions : '') + (r.agents ? ' by ' + r.agents : '')).join('\n') + '\n';
+
+        formatted += '\n% Action statements\n';
+        formatted += result.action_rules.map(r => r.action + ' causes ' + r.effect.join(', ') + (r.condition ? ' if ' + r.condition : '') + (r.agents ? ' by ' + r.agents : '')).join('\n') + '\n';
+
+        formatted += '\n% Actions execution\n';
+        formatted += result.action_execution.map(r => r.action + ' by ' + r.agents).join('\n') + '\n';
+
+
+
+        ignoreNext = true;
+        setTimeout(() => { ignoreNext = false }, 100);
+
+        let cursor = editor.getCursorPosition();
+        editor.setValue(formatted, -1);
+        editor.moveCursorToPosition(cursor);
+
         return result
     }
 });
