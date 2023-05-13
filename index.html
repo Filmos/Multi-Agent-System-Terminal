@@ -4,11 +4,12 @@
 <head>
     <meta charset="UTF-8" />
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
-    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
-    <link rel="stylesheet" href="./src/style.css" />
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; worker-src 'self' 'unsafe-inline' blob:" />
+    <meta http-equiv="X-Content-Security-Policy"
+        content="default-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; worker-src 'self' 'unsafe-inline' blob:" />
     <link rel="stylesheet" href="./bower_components/bootstrap/dist/css/bootstrap.min.css" />
-    <script src="./src/main.js"></script>
+    <link rel="stylesheet" href="./src/style.css" />
     <title>Multi-Agent System Terminal</title>
 </head>
 
@@ -17,10 +18,12 @@
         <div class="panel">
             Dropdown-based input
         </div>
-        <div class="panel">
-            Text input
-        </div>
+        <div id="editor" class="panel"></div>
+
     </div>
+
+    <script src="./bower_components/ace-builds/src-min/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="./src/main.js"></script>
 </body>
 
 </html>

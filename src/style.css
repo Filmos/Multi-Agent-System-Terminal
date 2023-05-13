@@ -1,6 +1,6 @@
 :root[theme="dark"] {
-    --c-bg-dark: #24252b;
-    --c-bg-light: #2d3134;
+    --c-bg-dark: #1e1f25;
+    --c-bg-light: #282a36;
 
     --bs-body-bg: var(--c-bg-dark);
     --bs-body-color: #fff;
@@ -22,6 +22,7 @@
     width: 100%;
     border-radius: calc(var(--rounding) * 0.4);
     padding: calc(var(--rounding) * 0.4);
+    font-size: 1rem;
 }
 
 .panel:first-child {
