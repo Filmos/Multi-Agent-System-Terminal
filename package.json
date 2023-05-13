@@ -1,0 +1,27 @@
+{
+  "name": "multi-agent-system-terminal",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "electron-builder --win portable"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Filmos/Multi-Agent-System-Terminal.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Filmos/Multi-Agent-System-Terminal/issues"
+  },
+  "homepage": "https://github.com/Filmos/Multi-Agent-System-Terminal#readme",
+  "devDependencies": {
+    "electron": "^24.3.0"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0"
+  }
+}
