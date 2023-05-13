@@ -1,0 +1,35 @@
+:root[theme="dark"] {
+    --c-bg-dark: #24252b;
+    --c-bg-light: #2d3134;
+
+    --bs-body-bg: var(--c-bg-dark);
+    --bs-body-color: #fff;
+
+    --gutter-size: 1.2rem;
+    --rounding: 0.3rem;
+}
+
+.panel-container {
+    display: flex;
+    height: calc(100vh - var(--gutter-size));
+    margin: calc(var(--gutter-size) * 0.65);
+    margin-bottom: calc(var(--gutter-size) * 0.35);
+}
+
+.panel {
+    background-color: var(--c-bg-light);
+    margin: calc(var(--gutter-size) * 0.35);
+    width: 100%;
+    border-radius: calc(var(--rounding) * 0.4);
+    padding: calc(var(--rounding) * 0.4);
+}
+
+.panel:first-child {
+    border-top-left-radius: var(--rounding);
+    border-bottom-left-radius: var(--rounding);
+}
+
+.panel:last-child {
+    border-top-right-radius: var(--rounding);
+    border-bottom-right-radius: var(--rounding);
+}

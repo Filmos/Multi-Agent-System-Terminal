@@ -1,17 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html theme="dark">
 
 <head>
     <meta charset="UTF-8" />
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
     <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
-    <title>Hello from Electron renderer!</title>
+    <link rel="stylesheet" href="./src/style.css" />
+    <link rel="stylesheet" href="./bower_components/bootstrap/dist/css/bootstrap.min.css" />
+    <script src="./src/main.js"></script>
+    <title>Multi-Agent System Terminal</title>
 </head>
 
 <body>
-    <h1>Hello from Electron renderer!</h1>
-    <p>👋</p>
+    <div class="panel-container">
+        <div class="panel">
+            Dropdown-based input
+        </div>
+        <div class="panel">
+            Text input
+        </div>
+    </div>
 </body>
 
 </html>
