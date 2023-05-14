@@ -76,7 +76,6 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
     }
 
     formatProgram();
-    getParsedProgram = formatProgram;
     function formatProgram() {
         var result = parseProgram();
         var formatted = '';
@@ -109,4 +108,6 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
 
         return result
     }
+
+    exports.getParsedProgram = formatProgram;
 });

@@ -6,31 +6,65 @@
     --bs-body-color: #fff;
 
     --gutter-size: 1.2rem;
-    --rounding: 0.3rem;
+    --spacer-size: 0.3;
+    --rounding: 0.45rem;
+}
+
+body {
+    padding: calc(var(--gutter-size) * (1 - var(--spacer-size)));
+    padding-bottom: calc(var(--gutter-size) * var(--spacer-size));
 }
 
 .panel-container {
     display: flex;
-    height: calc(100vh - var(--gutter-size));
-    margin: calc(var(--gutter-size) * 0.65);
-    margin-bottom: calc(var(--gutter-size) * 0.35);
+    height: calc(100vh - var(--gutter-size) * (1 + 2 * var(--spacer-size)) - 5.5rem);
 }
 
 .panel {
     background-color: var(--c-bg-light);
-    margin: calc(var(--gutter-size) * 0.35);
-    width: 100%;
+    margin: calc(var(--gutter-size) * var(--spacer-size));
     border-radius: calc(var(--rounding) * 0.4);
     padding: calc(var(--rounding) * 0.4);
     font-size: 1rem;
 }
 
-.panel:first-child {
-    border-top-left-radius: var(--rounding);
-    border-bottom-left-radius: var(--rounding);
+.panel-vertical {
+    width: 100%;
 }
 
-.panel:last-child {
+.panel-vertical:first-child {
+    border-top-left-radius: var(--rounding);
+}
+
+.panel-vertical:last-child {
     border-top-right-radius: var(--rounding);
+}
+
+.panel-horizontal {
+    height: 5.5rem;
+    border-bottom-left-radius: var(--rounding);
     border-bottom-right-radius: var(--rounding);
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-direction: column;
+}
+
+#query-selector.input-group {
+    width: max-content;
+    max-width: 100%;
+    margin-bottom: 0 !important;
+}
+
+#query-selector.input-group>.form-select {
+    flex-grow: 0;
+    width: fit-content;
+}
+
+#query-selector.input-group>.form-control[type="text"] {
+    max-width: 25rem;
+}
+
+#query-result {
+    height: 1.3rem;
 }

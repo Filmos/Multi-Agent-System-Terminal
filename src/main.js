@@ -1,4 +1,5 @@
-var getParsedProgram = () => null
+const { solve } = require('./src/core/solver.js')
 require('./src/app/syntax_highlight_rules.js')
 require('./src/app/main.js')
-require("app/main")
+const { getParsedQuery } = require('./src/app/button_controls.js')
+const { getParsedProgram } = require("app/main")
