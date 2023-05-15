@@ -27,7 +27,7 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
 
     % Actions execution
     LOAD by hunter
-    ATTACK by hunter and (andog or fox)`.replace(/\n[ ]*/g, '\n'), -1)
+    ATTACK by hunter, dog, fox`.replace(/\n[ ]*/g, '\n'), -1)
 
     let lastTimeout = null;
     let ignoreNext = false;
@@ -63,7 +63,7 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
                 else if (line.match(/^(-?[a-z_]+)\s+after\s+([-()a-z_ ]+)$/)) result['noninertial_rules_fluents'].push((r => ({ fluent: r[1], condition: r[2] }))(line.match(/^(-?[a-z_]+)\s+after\s+([-()a-z_ ]+)$/)));
                 else if (line.match(/^(-?[a-z_]+)\s+after\s+([A-Z_]+(?:.\s+[A-Z_]+))$/)) result['noninertial_rules_actions'].push((r => ({ fluent: r[1], actions: r[2].split(',').map(f => f.trim()) }))(line.match(/^(-?[a-z_]+)\s+after\s+([A-Z_]+(?:.\s+[A-Z_]+))$/)));
                 else if (line.match(/^[A-Z_]*\s+causes\s/)) result['action_rules'].push((r => ({ action: r[1], effect: r[2].split(',').map(f => f.trim()), condition: r[3], agents: r[4] }))(line.match(/^([A-Z_]*)\s+causes\s+(.+?)\s+(?:if\s+(.+)\s+)?(?:by\s+(.+))/)));
-                else if (line.match(/^[A-Z_]*\s+by\s/)) result['action_execution'].push((r => ({ action: r[1], agents: r[2] }))(line.match(/^([A-Z_]*)\s+by\s+(.+)/)));
+                else if (line.match(/^[A-Z_]*\s+by\s/)) result['action_execution'].push((r => ({ action: r[1], agents: r[2].split(',').map(f => f.trim()) }))(line.match(/^([A-Z_]*)\s+by\s+(.+)/)));
                 else invalidLine();
             } catch (e) {
                 // TODO: underline the line, prevent formatting
@@ -78,6 +78,7 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
     formatProgram();
     function formatProgram() {
         var result = parseProgram();
+        console.log(result)
         var formatted = '';
 
         formatted += '% Initial state\n';
@@ -95,7 +96,7 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
         formatted += result.action_rules.map(r => r.action + ' causes ' + r.effect.join(', ') + (r.condition ? ' if ' + r.condition : '') + (r.agents ? ' by ' + r.agents : '')).join('\n') + '\n';
 
         formatted += '\n% Actions execution\n';
-        formatted += result.action_execution.map(r => r.action + ' by ' + r.agents).join('\n') + '\n';
+        formatted += result.action_execution.map(r => r.action + ' by ' + r.agents.join(', ')).join('\n') + '\n';
 
 
 

@@ -66,7 +66,6 @@ define("app/syntax_highlight_rules", ["require", "exports", "module", "ace/lib/o
             ],
             "action_by": [
                 ...common,
-                { token: ["text", "constant.language.boolean"], regex: "(\\W)(and|or)(?=\\s)" },
                 { token: "storage.type", regex: "[a-z_]+" }
             ]
         };
