@@ -15,8 +15,58 @@
 
 <body>
     <div class="panel-container">
-        <div class="panel panel-vertical">
-            Dropdown-based input
+        <div class="panel panel-vertical panel-padded" id="panel-dropdown">
+            <div class="mb-3">
+                <p class="h5">Initial state</p>
+                <textarea class="form-control fluents" id="dropdown-initial" rows="3"></textarea>
+            </div>
+            <div class="mb-3" id="dropdown-noninertial-fluents">
+                <p class="h5">Noninertial rules (fluent-based)</p>
+                <div class="input-group mb-3 d-none">
+                    <input type="text" class="form-control dropdown-fluent limit-size">
+                    <span class="input-group-text">after</span>
+                    <input type="text" class="form-control dropdown-condition">
+                </div>
+            </div>
+            <div class="mb-3" id="dropdown-noninertial-actions">
+                <p class="h5">Noninertial rules (action-based)</p>
+                <div class="input-group mb-3 d-none">
+                    <input type="text" class="form-control dropdown-fluent limit-size">
+                    <span class="input-group-text">after</span>
+                    <input type="text" class="form-control dropdown-actions">
+                </div>
+            </div>
+            <div class="mb-3" id="dropdown-prohibitions">
+                <p class="h5">Prohibition statements</p>
+                <div class="input-group mb-3 d-none">
+                    <span class="input-group-text">impossible</span>
+                    <input type="text" class="form-control dropdown-action limit-size">
+                    <span class="input-group-text">if</span>
+                    <input type="text" class="form-control dropdown-condition">
+                    <span class="input-group-text">by</span>
+                    <input type="text" class="form-control dropdown-agents">
+                </div>
+            </div>
+            <div class="mb-3" id="dropdown-action-rules">
+                <p class="h5">Action statements</p>
+                <div class="input-group mb-3 d-none">
+                    <input type="text" class="form-control dropdown-action limit-size">
+                    <span class="input-group-text">causes</span>
+                    <input type="text" class="form-control dropdown-effect">
+                    <span class="input-group-text">if</span>
+                    <input type="text" class="form-control dropdown-condition">
+                    <span class="input-group-text">by</span>
+                    <input type="text" class="form-control dropdown-agents">
+                </div>
+            </div>
+            <div class="mb-3" id="dropdown-action-execution">
+                <p class="h5">Actions execution</p>
+                <div class="input-group mb-3 d-none">
+                    <input type="text" class="form-control dropdown-action limit-size">
+                    <span class="input-group-text">by</span>
+                    <input type="text" class="form-control dropdown-agents">
+                </div>
+            </div>
         </div>
         <div id="editor" class="panel panel-vertical"></div>
     </div>

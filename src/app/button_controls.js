@@ -41,4 +41,6 @@ document.getElementById("query-button").addEventListener("click", () => {
     }
 })
 
+document.getElementById("panel-dropdown").addEventListener("click", () => { accelarateCodeParse() })
+
 module.exports = { getParsedQuery }

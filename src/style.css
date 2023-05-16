@@ -28,6 +28,16 @@ body {
     font-size: 1rem;
 }
 
+.panel-padded {
+    padding: calc(var(--gutter-size) * 0.5);
+    color: #E9EFFF;
+    overflow: auto;
+}
+
+.panel-padded .input-group input.limit-size {
+    max-width: 12rem;
+}
+
 .panel-vertical {
     width: 100%;
 }
@@ -68,3 +78,13 @@ body {
 #query-result {
     height: 1.3rem;
 }
+
+textarea {
+    resize: none;
+    height: 4rem;
+    /* background-color: #44475a !important; */
+}
+
+/* .fluents {
+    color: #ffb86c !important;
+} */
