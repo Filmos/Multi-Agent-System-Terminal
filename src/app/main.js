@@ -11,7 +11,6 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
     editor.setValue(`% Noninertial rules
     noninertial fleeing
     -fleeing after -alive or dead
-    -scared after LOAD, ATTACK
 
     % Initial state
     initially alive
@@ -50,7 +49,7 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
             initial_state: new Set(),
             noninertial_fluents: new Set(),
             noninertial_rules_fluents: [],
-            noninertial_rules_actions: [],
+            // noninertial_rules_actions: [],
             prohibitions: [],
             action_rules: [],
             action_execution: [],
@@ -69,7 +68,7 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
                 else if (keyword == 'noninertial') line.substring(keyword.length).split(',').map(f => f.trim()).filter(f => f.length > 0 && (f[0] != '-' || invalidLine())).forEach(f => result['noninertial_fluents'].add(f));
                 else if (keyword == 'impossible') result['prohibitions'].push((r => ({ action: r[1], condition: r[2], agents: r[3] }))(line.match(/^impossible\s+([A-Z_]*)\s+(?:if\s+(.+?)\s+)?(?:by\s+(.+?))?$/)));
                 else if (line.match(/^(-?[a-z_]+)\s+after\s+([-()a-z_ ]+)$/)) result['noninertial_rules_fluents'].push((r => ({ fluent: r[1], condition: r[2] }))(line.match(/^(-?[a-z_]+)\s+after\s+([-()a-z_ ]+)$/)));
-                else if (line.match(/^(-?[a-z_]+)\s+after\s+([A-Z_]+(?:\s*,\s+[A-Z_]+))$/)) result['noninertial_rules_actions'].push((r => ({ fluent: r[1], actions: r[2].split(',').map(f => f.trim()) }))(line.match(/^(-?[a-z_]+)\s+after\s+([A-Z_]+(?:\s*,\s+[A-Z_]+))$/)));
+                // else if (line.match(/^(-?[a-z_]+)\s+after\s+([A-Z_]+(?:\s*,\s+[A-Z_]+))$/)) result['noninertial_rules_actions'].push((r => ({ fluent: r[1], actions: r[2].split(',').map(f => f.trim()) }))(line.match(/^(-?[a-z_]+)\s+after\s+([A-Z_]+(?:\s*,\s+[A-Z_]+))$/)));
                 else if (line.match(/^[A-Z_]*\s+causes\s/)) result['action_rules'].push((r => ({ action: r[1], effect: r[2].split(',').map(f => f.trim()), condition: r[3], agents: r[4] }))(line.match(/^([A-Z_]*)\s+causes\s+(.+?)\s+(?:if\s+(.+)\s+)?(?:by\s+(.+))/)));
                 else if (line.match(/^[A-Z_]*\s+by\s/)) result['action_execution'].push((r => ({ action: r[1], agents: r[2].split(',').map(f => f.trim()) }))(line.match(/^([A-Z_]*)\s+by\s+(.+)/)));
                 else invalidLine();
@@ -92,7 +91,7 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
         formatted += '\n% Noninertial rules\n';
         if (result.noninertial_fluents.size > 0) formatted += 'noninertial ' + [...result.noninertial_fluents].join(', ') + '\n';
         formatted += result.noninertial_rules_fluents.map(r => r.fluent + ' after ' + r.condition + '\n').join('');
-        formatted += result.noninertial_rules_actions.map(r => r.fluent + ' after ' + r.actions.join(', ') + '\n').join('');
+        // formatted += result.noninertial_rules_actions.map(r => r.fluent + ' after ' + r.actions.join(', ') + '\n').join('');
 
         formatted += '\n% Prohibition statements\n';
         formatted += result.prohibitions.map(r => 'impossible ' + r.action + (r.condition ? ' if ' + r.condition : '') + (r.agents ? ' by ' + r.agents : '') + '\n').join('');
