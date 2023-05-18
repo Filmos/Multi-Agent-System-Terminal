@@ -10,23 +10,24 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
     });
     editor.setValue(`% Noninertial rules
     noninertial fleeing
-    -fleeing after -alive or dead
+    -fleeing after -alive
 
     % Initial state
-    initially alive
+    initially alive, armed, loaded
 
     % Prohibition statements 
-    impossible LOAD by deer
+    impossible ATTACK by deer
+    impossible FLEEE by hunter
 
     % Action statements
-    LOAD causes loaded by hunter
-    ATTACK causes -alive, -ko-ko if loaded by hunter
-    ATTACK causes -alive if (loaded or -sa_nity or -sa-sas) and alive by hunter
-    ATTACK causes -loaded, -sanity by hunter
+    FLEE causes fleeing by deer
+    ATTACK causes -alive if loaded and -fleeing by hunter
+    ATTACK causes -loaded by hunter
+    
 
     % Actions execution
-    LOAD by hunter
-    ATTACK by hunter, dog, fox`.replace(/\n[ ]*/g, '\n'), -1)
+    FLEE by deer
+    ATTACK by hunter`.replace(/\n[ ]*/g, '\n'), -1)
 
     let lastTimeout = null;
     let ignoreNext = false;
