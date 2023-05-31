@@ -14,85 +14,108 @@
 </head>
 
 <body>
-    <div class="panel-container">
-        <div class="panel panel-vertical panel-padded" id="panel-dropdown">
-            <div class="mb-3">
-                <p class="h5">Initial state</p>
-                <textarea class="form-control fluents" id="dropdown-initial" rows="3"></textarea>
-            </div>
-            <div class="mb-3" id="dropdown-noninertial-fluents">
-                <p class="h5">Noninertial rules (fluent-based)</p>
-                <div class="input-group mb-3 d-none">
-                    <input type="text" class="form-control dropdown-fluent limit-size">
-                    <span class="input-group-text">after</span>
-                    <input type="text" class="form-control dropdown-condition">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#main-tab-pane"
+                type="button" role="tab" aria-controls="main-tab-pane" aria-selected="true">Definition</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="query-tab" data-bs-toggle="tab" data-bs-target="#query-tab-pane" type="button"
+                role="tab" aria-controls="query-tab-pane" aria-selected="false">Query</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="graph-tab" data-bs-toggle="tab" data-bs-target="#graph-tab-pane" type="button"
+                role="tab" aria-controls="graph-tab-pane" aria-selected="false">Graph</button>
+        </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="main-tab-pane" role="tabpanel" aria-labelledby="main-tab"
+            tabindex="0">
+            <div class="panel-container">
+                <div class="panel panel-vertical panel-padded" id="panel-dropdown">
+                    <div class="mb-3">
+                        <p class="h5">Initial state</p>
+                        <textarea class="form-control fluents" id="dropdown-initial" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3" id="dropdown-noninertial-fluents">
+                        <p class="h5">Noninertial rules (fluent-based)</p>
+                        <div class="input-group mb-3 d-none">
+                            <input type="text" class="form-control dropdown-fluent limit-size">
+                            <span class="input-group-text">after</span>
+                            <input type="text" class="form-control dropdown-condition">
+                        </div>
+                    </div>
+                    <div class="mb-3" id="dropdown-prohibitions">
+                        <p class="h5">Prohibition statements</p>
+                        <div class="input-group mb-3 d-none">
+                            <span class="input-group-text">impossible</span>
+                            <input type="text" class="form-control dropdown-action limit-size">
+                            <span class="input-group-text">if</span>
+                            <input type="text" class="form-control dropdown-condition">
+                            <span class="input-group-text">by</span>
+                            <input type="text" class="form-control dropdown-agents">
+                        </div>
+                    </div>
+                    <div class="mb-3" id="dropdown-action-rules">
+                        <p class="h5">Action statements</p>
+                        <div class="input-group mb-3 d-none">
+                            <input type="text" class="form-control dropdown-action limit-size">
+                            <span class="input-group-text">causes</span>
+                            <input type="text" class="form-control dropdown-effect">
+                            <span class="input-group-text">if</span>
+                            <input type="text" class="form-control dropdown-condition">
+                            <span class="input-group-text">by</span>
+                            <input type="text" class="form-control dropdown-agents">
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <!-- <div class="mb-3" id="dropdown-noninertial-actions">
-                <p class="h5">Noninertial rules (action-based)</p>
-                <div class="input-group mb-3 d-none">
-                    <input type="text" class="form-control dropdown-fluent limit-size">
-                    <span class="input-group-text">after</span>
-                    <input type="text" class="form-control dropdown-actions">
-                </div>
-            </div> -->
-            <div class="mb-3" id="dropdown-prohibitions">
-                <p class="h5">Prohibition statements</p>
-                <div class="input-group mb-3 d-none">
-                    <span class="input-group-text">impossible</span>
-                    <input type="text" class="form-control dropdown-action limit-size">
-                    <span class="input-group-text">if</span>
-                    <input type="text" class="form-control dropdown-condition">
-                    <span class="input-group-text">by</span>
-                    <input type="text" class="form-control dropdown-agents">
-                </div>
-            </div>
-            <div class="mb-3" id="dropdown-action-rules">
-                <p class="h5">Action statements</p>
-                <div class="input-group mb-3 d-none">
-                    <input type="text" class="form-control dropdown-action limit-size">
-                    <span class="input-group-text">causes</span>
-                    <input type="text" class="form-control dropdown-effect">
-                    <span class="input-group-text">if</span>
-                    <input type="text" class="form-control dropdown-condition">
-                    <span class="input-group-text">by</span>
-                    <input type="text" class="form-control dropdown-agents">
-                </div>
-            </div>
-            <div class="mb-3" id="dropdown-action-execution">
-                <p class="h5">Actions execution</p>
-                <div class="input-group mb-3 d-none">
-                    <input type="text" class="form-control dropdown-action limit-size">
-                    <span class="input-group-text">by</span>
-                    <input type="text" class="form-control dropdown-agents">
-                </div>
+                <div id="editor" class="panel panel-vertical"></div>
+                <p class="editor-locator"></p>
             </div>
         </div>
-        <div id="editor" class="panel panel-vertical"></div>
-    </div>
-    <div class="panel panel-horizontal">
-        <div class="input-group mb-3" id="query-selector">
-            <select class="form-select" id="query-tag">
-                <option selected value=""></option>
-                <option value="necessary">necessary</option>
-                <option value="possibly">possibly</option>
-            </select>
-            <input type="text" class="form-control" id="query-target">
-            <select class="form-select" id="query-target-type">
-                <option selected value="(fluent)">(fluent)</option>
-                <option value="active">active</option>
-                <option value="indispensable">indispensable</option>
-            </select>
-            <span class="input-group-text">in Π</span>
-            <select class="form-select" id="query-from-tag">
-                <option selected value=""></option>
-                <option value="from">from</option>
-            </select>
-            <input disabled type="text" class="form-control" id="query-from">
-            <button type="button" id="query-button" class="btn btn-secondary">?</button>
+        <div class="tab-pane fade" id="query-tab-pane" role="tabpanel" aria-labelledby="query-tab" tabindex="0">
+            <div class="panel-container with-query">
+                <div class="panel panel-vertical panel-padded" id="panel-dropdown">
+                    <div class="mb-3" id="dropdown-action-execution">
+                        <p class="h5">Program</p>
+                        <div class="input-group mb-3 d-none">
+                            <input type="text" class="form-control dropdown-action limit-size">
+                            <span class="input-group-text">by</span>
+                            <input type="text" class="form-control dropdown-agents">
+                        </div>
+                    </div>
+                </div>
+                <p class="editor-locator"></p>
+            </div>
+            <div class="panel panel-horizontal">
+                <div class="input-group mb-3" id="query-selector">
+                    <select class="form-select" id="query-tag">
+                        <option selected value=""></option>
+                        <option value="necessary">necessary</option>
+                        <option value="possibly">possibly</option>
+                    </select>
+                    <input type="text" class="form-control" id="query-target">
+                    <select class="form-select" id="query-target-type">
+                        <option selected value="(fluent)">(fluent)</option>
+                        <option value="active">active</option>
+                        <option value="indispensable">indispensable</option>
+                    </select>
+                    <span class="input-group-text">in Π</span>
+                    <select class="form-select" id="query-from-tag">
+                        <option selected value=""></option>
+                        <option value="from">from</option>
+                    </select>
+                    <input disabled type="text" class="form-control" id="query-from">
+                    <button type="button" id="query-button" class="btn btn-secondary">?</button>
+                </div>
+                <div id="query-result"></div>
+            </div>
         </div>
-        <div id="query-result"></div>
+        <div class="tab-pane fade" id="graph-tab-pane" role="tabpanel" aria-labelledby="graph-tab" tabindex="0">...
+        </div>
     </div>
+
+
 
 
     <script src="./bower_components/bootstrap/dist/js/bootstrap.bundle.min.js" type="text/javascript"

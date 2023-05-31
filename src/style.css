@@ -10,15 +10,27 @@
     --rounding: 0.45rem;
 }
 
-body {
+.nav-tabs {
+    background-color: #131316;
+    padding-top: calc(var(--gutter-size) * (1 - var(--spacer-size)));
+    height: 3.45rem;
+}
+
+.tab-pane {
     padding: calc(var(--gutter-size) * (1 - var(--spacer-size)));
+    padding-top: calc(var(--gutter-size) * (1 - var(--spacer-size)));
     padding-bottom: calc(var(--gutter-size) * var(--spacer-size));
 }
 
 .panel-container {
     display: flex;
-    height: calc(100vh - var(--gutter-size) * (1 + 2 * var(--spacer-size)) - 5.5rem);
+    height: calc(100vh - var(--gutter-size) - 3.45rem);
 }
+
+.panel-container.with-query {
+    height: calc(100vh - var(--gutter-size) * (1 + 2 * var(--spacer-size)) - 5.5rem - 3.45rem);
+}
+
 
 .panel {
     background-color: var(--c-bg-light);
@@ -42,12 +54,20 @@ body {
     width: 100%;
 }
 
-.panel-vertical:first-child {
+.panel-vertical:first-of-type {
     border-top-left-radius: var(--rounding);
 }
 
-.panel-vertical:last-child {
+.panel-vertical:last-of-type {
     border-top-right-radius: var(--rounding);
+}
+
+.panel-container:not(.with-query) .panel-vertical:first-of-type {
+    border-bottom-left-radius: var(--rounding);
+}
+
+.panel-container:not(.with-query) .panel-vertical:last-of-type {
+    border-bottom-right-radius: var(--rounding);
 }
 
 .panel-horizontal {
@@ -82,9 +102,8 @@ body {
 textarea {
     resize: none;
     height: 4rem;
-    /* background-color: #44475a !important; */
 }
 
-/* .fluents {
-    color: #ffb86c !important;
-} */
+.editor-locator {
+    display: none;
+}

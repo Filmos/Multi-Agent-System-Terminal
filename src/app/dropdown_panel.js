@@ -3,7 +3,6 @@ function parseDropdowns() {
         initial_state: new Set(),
         noninertial_fluents: new Set(),
         noninertial_rules_fluents: [],
-        // noninertial_rules_actions: [],
         prohibitions: [],
         action_rules: [],
         action_execution: [],
@@ -14,10 +13,6 @@ function parseDropdowns() {
         result["noninertial_fluents"].add(e.fluent[0] == '-' ? e.fluent.substring(1) : e.fluent)
         result["noninertial_rules_fluents"].push({ fluent: e.fluent, condition: e.condition })
     })
-    // readGUI("dropdown-noninertial-actions", (e) => {
-    //     result["noninertial_fluents"].add(e.fluent[0] == '-' ? e.fluent.substring(1) : e.fluent)
-    //     result["noninertial_rules_actions"].push({ fluent: e.fluent, actions: e.actions.split(",").map((x) => x.trim()) })
-    // })
     readGUI("dropdown-prohibitions", (e) => {
         result["prohibitions"].push({ action: e.action, condition: e.condition, agents: e.agents })
     })
@@ -45,7 +40,6 @@ function readGUI(parent, callback) {
 function fillDropdowns(program) {
     document.getElementById("dropdown-initial").innerText = Array.from(program["initial_state"].values()).join(", ")
     makeGUI("dropdown-noninertial-fluents", program["noninertial_rules_fluents"], (e) => ({ "fluent": e.fluent, "condition": e.condition }))
-    // makeGUI("dropdown-noninertial-actions", program["noninertial_rules_actions"], (e) => ({ "fluent": e.fluent, "actions": e.actions.join(", ") }))
     makeGUI("dropdown-prohibitions", program["prohibitions"], (e) => ({ "action": e.action, "condition": e.condition, "agents": e.agents }))
     makeGUI("dropdown-action-rules", program["action_rules"], (e) => ({ "action": e.action, "effect": e.effect.join(", "), "condition": e.condition, "agents": e.agents }))
     makeGUI("dropdown-action-execution", program["action_execution"], (e) => ({ "action": e.action, "agents": e.agents.join(", ") }))
@@ -82,5 +76,13 @@ document.querySelectorAll("#panel-dropdown textarea, #panel-dropdown input").for
         parseDropdowns()
     })
 })
+
+document.querySelectorAll("#main-tab, #query-tab").forEach((tab) => {
+    tab.addEventListener('show.bs.tab', event => {
+        let controls = document.getElementById(event.target.getAttribute('aria-controls')).querySelector(".editor-locator");
+        controls.parentNode.insertBefore(document.getElementById("editor"), controls);
+    })
+})
+
 
 module.exports = { parseDropdowns, fillDropdowns }
