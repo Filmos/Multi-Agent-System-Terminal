@@ -77,12 +77,4 @@ document.querySelectorAll("#panel-dropdown textarea, #panel-dropdown input").for
     })
 })
 
-document.querySelectorAll("#main-tab, #query-tab").forEach((tab) => {
-    tab.addEventListener('show.bs.tab', event => {
-        let controls = document.getElementById(event.target.getAttribute('aria-controls')).querySelector(".editor-locator");
-        controls.parentNode.insertBefore(document.getElementById("editor"), controls);
-    })
-})
-
-
 module.exports = { parseDropdowns, fillDropdowns }

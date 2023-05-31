@@ -6,6 +6,8 @@ npm i
 npm i -g bower
 bower i bootstrap
 bower i ace-builds
+bower i cytoscape
+bower i cytoscape-euler
 ```
 
 ## Running in dev mode

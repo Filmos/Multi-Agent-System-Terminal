@@ -70,4 +70,21 @@ function solve(program, query) {
     console.log(current_state)
     return Math.random() > 0.5
 }
-module.exports = { solve }
+
+function makeGraph(program) {
+    // TODO @Alu: Implement this
+    return {
+        nodes: {
+            "a": "-fleeing, -dead",
+            "b": "-fleeing, dead",
+            "c": "fleeing, -dead",
+        },
+        edges: [
+            { from: "a", to: "b", label: "KILL by hunter" },
+            { from: "a", to: "c", label: "RUN by deer" },
+            { from: "c", to: "b", label: "KILL by hunter" },
+            { from: "c", to: "a", label: "STOP by deer" },
+        ]
+    }
+}
+module.exports = { solve, makeGraph }
