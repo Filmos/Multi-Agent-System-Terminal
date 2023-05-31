@@ -87,7 +87,7 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
         formatted += '% Initial state\n';
         if (result.initial_state.size > 0) formatted += 'initially ' + [...result.initial_state].join(', ') + '\n';
 
-        formatted += '\n% Noninertial rules\n';
+        formatted += '\n% Value statements\n';
         if (result.noninertial_fluents.size > 0) formatted += 'noninertial ' + [...result.noninertial_fluents].join(', ') + '\n';
         formatted += result.noninertial_rules_fluents.map(r => r.fluent + ' after ' + r.condition + '\n').join('');
 
