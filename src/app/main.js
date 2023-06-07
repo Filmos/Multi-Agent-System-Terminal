@@ -17,7 +17,7 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
 
     % Prohibition statements 
     impossible ATTACK by deer
-    impossible FLEEE by hunter
+    impossible FLEE by hunter
 
     % Action statements
     FLEE causes fleeing by deer

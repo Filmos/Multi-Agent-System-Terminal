@@ -8,30 +8,34 @@ function solve(program, query) {
 function makeGraph(program) {
     // TODO @Alu: Implement this
     var nodes = {}
+    var edges = []
     var actions = get_all_actions(program)
     var agents = get_all_agents(program)
-    var states = get_all_states(program)
+    states_fluents=get_all_states(program)
+    var states = states_fluents[0]
+    var fluents = states_fluents[1]
     states.forEach(element => {nodes[element.join(", ")]=element.join(", ")});
 
-    states.forEach(state => {agents.forEach(agent => {actions.forEach(action => {choose_action(program,state,agent,action)
-        
+    states.forEach(state => {agents.forEach(agent => {actions.forEach(action => {
+        edge = choose_action(program,fluents,state,agent,action)
+        if(typeof edge !== 'undefined'){
+            edges.push(edge)}
     });
         
     });
         
     });
-
-
     return {
         nodes: nodes,
-        edges: [
+        edges: edges
+        //[
             // { from: "a", to: "b", label: "KILL by hunter" },
             // { from: "a", to: "c", label: "RUN by deer" },
             // { from: "c", to: "b", label: "KILL by hunter" },
             // { from: "c", to: "b", label: "KILL by hunter" },
             // { from: "c", to: "b", label: "KILL by hunter" },
             // { from: "c", to: "a", label: "STOP by deer" },
-        ]
+        //]
     }
 }
 
@@ -92,7 +96,7 @@ function get_all_states(program){
     });});
     all_fluent_subsets.forEach(element => {element.sort(endComparator)});
     console.log(all_fluent_subsets)
-    return all_fluent_subsets
+    return [all_fluent_subsets,all_fluents]
 }
 
 function get_all_agents(program){
@@ -120,7 +124,74 @@ function get_all_actions(program){
     return all_actions
 }
 
-function choose_action(program, state, agents, action){
-    console.log(state,agents,action)
+function arrayRemove(arr, value) { 
+    return arr.filter(function(ele){ 
+        return ele != value; 
+    });
 }
-module.exports = { solve, makeGraph }
+
+function choose_action(program, fluents, state, agents, action){
+    
+    for (let index = 0; index < program.prohibitions.length; index++) {
+
+        let intersection = new Set([...new Set(program.prohibitions[index].agents.split(', '))].filter(x => new Set(agents).has(x)));
+        if (program.prohibitions[index].action==action && intersection.size!=0) {
+            return
+            // return to the same node if impossible ????????
+            // return {from:state.join(", "),to:state.join(", "),label:action+" "+agents.join(", ")}
+        }
+    }
+
+    agent_subset_count=0
+    for (let index = 0; index < program.action_rules.length; index++) {
+
+        needed_agents = new Set(program.action_rules[index].agents.split(', '))
+        let intersection = new Set([...needed_agents].filter(x => new Set(agents).has(x)));
+        condition = program.action_rules[index].condition
+        if(typeof condition !== 'undefined'){
+            fluents.forEach(fluent => {
+                if(state.includes("-"+fluent)){
+                    condition=condition.replace("-"+fluent,'true')
+                    condition=condition.replace(fluent,'false')
+                }
+                else{
+                    condition=condition.replace("-"+fluent,'false')
+                    condition=condition.replace(fluent,'true')
+            }   
+            });
+            condition=condition.replace("and",'&&')
+            condition=condition.replace("or",'||')
+            condition=eval(condition)
+            
+        }
+        else{
+            condition=true
+        }
+
+        if(program.action_rules[index].action==action && 
+            intersection.size==needed_agents.size && condition && intersection.size>agent_subset_count){
+                agent_subset_count=intersection.size
+                choosen_action=program.action_rules[index]
+        }
+    }
+    out_state=state
+    console.log(choosen_action)
+
+    choosen_action.effect.forEach(effect => {
+        out_state=arrayRemove(out_state,make_positive(effect))
+        out_state=arrayRemove(out_state,make_negative(effect))
+        out_state.push(effect)
+    });
+
+    program.noninertial_rules_fluents.forEach(rule => {
+        if (out_state.includes(rule.condition)){
+            out_state=arrayRemove(out_state,make_positive(rule.fluent))
+            out_state=arrayRemove(out_state,make_negative(rule.fluent))
+            out_state.push(rule.fluent)
+        }
+    });
+    out_state=out_state.sort(endComparator)
+
+    return {from:state.join(", "),to:out_state.join(", "),label:action+" "+agents.join(", ")}
+}
+module.exports = {solve, makeGraph}
