@@ -17,7 +17,7 @@ function makeGraph(program) {
     states.forEach(element => {nodes[element.join(", ")]=element.join(", ")});
 
     states.forEach(state => {agents.forEach(agent => {actions.forEach(action => {
-        edge = choose_action(program,fluents,state,agent,action)
+        edge = make_edge(program,fluents,state,agent,action)
         if(typeof edge !== 'undefined'){
             edges.push(edge)}
     });
@@ -130,7 +130,7 @@ function arrayRemove(arr, value) {
     });
 }
 
-function choose_action(program, fluents, state, agents, action){
+function make_edge(program, fluents, state, agents, action){
     
     for (let index = 0; index < program.prohibitions.length; index++) {
 
