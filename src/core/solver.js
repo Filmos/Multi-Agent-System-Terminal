@@ -143,6 +143,7 @@ function make_edge(program, fluents, state, agents, action){
     }
 
     agent_subset_count=0
+    choosen_action = null
     for (let index = 0; index < program.action_rules.length; index++) {
 
         needed_agents = new Set(program.action_rules[index].agents.split(', '))
@@ -176,7 +177,9 @@ function make_edge(program, fluents, state, agents, action){
     }
     out_state=state
     console.log(choosen_action)
-
+    if (choosen_action == null){
+        return
+    }
     choosen_action.effect.forEach(effect => {
         out_state=arrayRemove(out_state,make_positive(effect))
         out_state=arrayRemove(out_state,make_negative(effect))
