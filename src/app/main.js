@@ -13,7 +13,7 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
     -fleeing after -alive
 
     % Initial state
-    initially alive, armed, loaded
+    initially alive, loaded
 
     % Prohibition statements 
     impossible ATTACK by deer

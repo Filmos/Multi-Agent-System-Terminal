@@ -2,89 +2,125 @@ function solve(program, query) {
     if (!query.target.fluent && !query.target.agent) throw new Error("No target specified")
     // TODO @Alu: Implement this
     console.log(program, query)
-
-    // finding literals in effects of actions
-    // TODO @Alu: find literals in conditions of actions and noninertial
-    if (query.target.type=='fluent'){
-        current_state = program.initial_state
-        for (let i = 0; i < program.action_rules.length; i++) {
-            for (let j = 0; j < program.action_rules[i].effect.length; j++) {
-                if(program.action_rules[i].effect[j][0]=='-'){
-                    if (!current_state.has(program.action_rules[i].effect[j].slice(1))){
-                        current_state.add(program.action_rules[i].effect[j])
-                    }
-                }
-                else{
-                    if (!current_state.has(program.action_rules[i].effect[j])){
-                        current_state.add('-'+program.action_rules[i].effect[j])
-                    }
-                }
-            }
-        }
-        let areSetsEqual = (a, b) => a.size === b.size && [...a].every(value => b.has(value));
-
-    for(let i = 0; i < program.action_execution.length; i++){
-        current_action = program.action_execution[i]
-        for(let j = 0; j < program.action_rules.length; j++){
-            checked_action = program.action_rules[j]
-            if (current_action.action==checked_action.action && current_action.agent==checked_action.agent){
-                if (checked_action.condition!=undefined && checked_action.condition!=''){
-                    current_conditions = new Set(checked_action.condition.split(' and '))
-                }
-                else{
-                    current_conditions = new Set()
-                }
-                
-                union = new Set([...current_state, ...current_conditions])
-                if (areSetsEqual(union,current_state)){
-                    for(let k = 0; k < checked_action.effect.length; k++){
-                        if(!current_state.has(checked_action.effect[k])){
-                            if(checked_action.effect[k][0]=='-'){
-                                current_state.delete(checked_action.effect[k].slice(1))
-                                current_state.add(checked_action.effect[k])
-                            }else{
-                                current_state.delete('-'+checked_action.effect[k])
-                                current_state.add(checked_action.effect[k])
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        for(let j = 0; j < program.noninertial_rules_fluents.length; j++){
-            if(current_state.has(program.noninertial_rules_fluents[j].condition)){
-                console.log('AAAAA')
-                if(program.noninertial_rules_fluents[j].fluent[0]=='-'){
-                    current_state.delete(program.noninertial_rules_fluents[j].fluent.slice(1))
-                    current_state.add(program.noninertial_rules_fluents[j].fluent)
-                }else{
-                    current_state.delete('-'+program.noninertial_rules_fluents[j].fluent)
-                    current_state.add(program.noninertial_rules_fluents[j].fluent)
-                }
-            }
-        }
-    }
-    console.log(current_state)
-    return current_state.has(query.target.fluent)
-    }
-    console.log(current_state)
     return Math.random() > 0.5
 }
 
 function makeGraph(program) {
     // TODO @Alu: Implement this
+    var nodes = {}
+    var actions = get_all_actions(program)
+    var agents = get_all_agents(program)
+    var states = get_all_states(program)
+    states.forEach(element => {nodes[element.join(", ")]=element.join(", ")});
+
+    states.forEach(state => {agents.forEach(agent => {actions.forEach(action => {choose_action(program,state,agent,action)
+        
+    });
+        
+    });
+        
+    });
+
+
     return {
-        nodes: {
-            "a": "-fleeing, -dead",
-            "b": "-fleeing, dead",
-            "c": "fleeing, -dead",
-        },
+        nodes: nodes,
         edges: [
-            { from: "a", to: "b", label: "KILL by hunter" },
-            { from: "a", to: "c", label: "RUN by deer" },
-            { from: "c", to: "b", label: "KILL by hunter" },
-            { from: "c", to: "a", label: "STOP by deer" },
+            // { from: "a", to: "b", label: "KILL by hunter" },
+            // { from: "a", to: "c", label: "RUN by deer" },
+            // { from: "c", to: "b", label: "KILL by hunter" },
+            // { from: "c", to: "b", label: "KILL by hunter" },
+            // { from: "c", to: "b", label: "KILL by hunter" },
+            // { from: "c", to: "a", label: "STOP by deer" },
         ]
     }
+}
+
+function make_positive(fluent){
+    if (fluent[0]=='-'){
+        return fluent.slice(1)
+    }
+    return fluent
+}
+function make_negative(fluent){
+    if (fluent[0]!='-'){
+        return '-'+fluent
+    }
+    return fluent
+}
+
+const getAllSubsets = 
+      theArray => theArray.reduce(
+        (subsets, value) => subsets.concat(
+         subsets.map(set => [value,...set])
+        ),
+        [[]]
+      );
+
+function endComparator(a,b) {
+    if (a.slice(-2) < b.slice(-2)) return -1;
+    if (a.slice(-2) > b.slice(-2)) return 1;
+    return 0;
+}
+
+function get_all_states(program){
+    // get fluents from initial_state
+    all_fluents = program.initial_state
+
+    // get fluents from noninertial_fluents
+    all_fluents = new Set([...all_fluents, ...program.noninertial_fluents]);
+
+    // get fluents from noninertial_rules_fluents
+    program.noninertial_rules_fluents.forEach(rule => {rule.condition.split(" and ").forEach(element_and => {element_and.split(" or ").forEach(element_and_or => {all_fluents.add(make_positive(element_and_or))
+        });});});
+
+    // get fluents from action_rules
+    program.action_rules.forEach(element => {element.effect.forEach(effect => {all_fluents.add(make_positive(effect))
+    });});
+    program.action_rules.forEach(element => {
+        if (typeof element.condition !== 'undefined'){
+            element.condition.split(" and ").forEach(element_and => {element_and.split(" or ").forEach(element_and_or => {all_fluents.add(make_positive(element_and_or))
+            });});
+        }
+        });
+    
+    // create all possible subsets
+    var all_fluent_subsets = getAllSubsets(Array.from(all_fluents))
+    all_fluent_subsets.forEach(subset => {all_fluents.forEach(fluent => {
+        if(!subset.includes(fluent)){
+            subset.push(make_negative(fluent))
+        }
+    });});
+    all_fluent_subsets.forEach(element => {element.sort(endComparator)});
+    console.log(all_fluent_subsets)
+    return all_fluent_subsets
+}
+
+function get_all_agents(program){
+    all_agents = new Set()
+    // get agents from prohibitions
+    program.prohibitions.forEach(prohib => {prohib.agents.split(', ').forEach(agent => {all_agents.add(agent)});});
+
+    // get agents from action_rules
+    program.action_rules.forEach(action => {action.agents.split(', ').forEach(agent => {all_agents.add(agent)});});
+
+    // get agents from action_execution
+    program.action_execution.forEach(action => {action.agents.forEach(agent => {all_agents.add(agent)});});
+    all_agents = Array.from(all_agents)
+    all_agents_subsets = getAllSubsets(all_agents)
+    all_agents_subsets = all_agents_subsets.filter(element => element.length!=0)
+    console.log(all_agents_subsets)
+    return all_agents_subsets
+}
+
+function get_all_actions(program){
+    all_actions = new Set()
+    program.action_rules.forEach(rule => {all_actions.add(rule.action)});
+    all_actions = Array.from(all_actions)
+    console.log(all_actions)
+    return all_actions
+}
+
+function choose_action(program, state, agents, action){
+    console.log(state,agents,action)
 }
 module.exports = { solve, makeGraph }
