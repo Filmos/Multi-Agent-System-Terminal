@@ -6,7 +6,6 @@ function solve(program, query) {
 }
 
 function makeGraph(program) {
-    // TODO @Alu: Implement this
     var nodes = {}
     var edges = []
     var actions = get_all_actions(program)
@@ -131,13 +130,13 @@ function arrayRemove(arr, value) {
 }
 
 function make_edge(program, fluents, state, agents, action){
-    
+    // prohibition
     for (let index = 0; index < program.prohibitions.length; index++) {
 
         let intersection = new Set([...new Set(program.prohibitions[index].agents.split(', '))].filter(x => new Set(agents).has(x)));
         if (program.prohibitions[index].action==action && intersection.size!=0) {
-            // return to the same node if impossible ????????
-            return {from:state.join(", "),to:state.join(", "),label:action+" "+agents.join(", ")}
+            return
+            //return {from:state.join(", "),to:state.join(", "),label:action+" "+agents.join(", ")}
         }
     }
 
