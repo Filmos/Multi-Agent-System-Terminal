@@ -136,9 +136,8 @@ function make_edge(program, fluents, state, agents, action){
 
         let intersection = new Set([...new Set(program.prohibitions[index].agents.split(', '))].filter(x => new Set(agents).has(x)));
         if (program.prohibitions[index].action==action && intersection.size!=0) {
-            return
             // return to the same node if impossible ????????
-            // return {from:state.join(", "),to:state.join(", "),label:action+" "+agents.join(", ")}
+            return {from:state.join(", "),to:state.join(", "),label:action+" "+agents.join(", ")}
         }
     }
 
@@ -178,7 +177,7 @@ function make_edge(program, fluents, state, agents, action){
     out_state=state
     console.log(choosen_action)
     if (choosen_action == null){
-        return
+        return {from:state.join(", "),to:state.join(", "),label:action+" "+agents.join(", ")}
     }
     choosen_action.effect.forEach(effect => {
         out_state=arrayRemove(out_state,make_positive(effect))
