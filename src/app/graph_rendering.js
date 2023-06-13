@@ -1,5 +1,4 @@
 let globalData = {};
-cytoscape.use(cytoscapeEuler);
 
 function throttle(callback, delay = 1000) {
     let shouldWait = false;
@@ -44,10 +43,22 @@ const renderGraphInner = throttle(function () {
     setTimeout(() => {
         var graph = cytoscape({
             layout: {
-                name: 'euler',
-                randomize: true,
-                animate: false,
-                springLength: edge => 500,
+                name: 'cose',
+                idealEdgeLength: 100,
+                nodeOverlap: 20,
+                refresh: 20,
+                fit: true,
+                padding: 30,
+                randomize: false,
+                componentSpacing: 500,
+                nodeRepulsion: 400000,
+                edgeElasticity: 200,
+                nestingFactor: 5,
+                gravity: 80,
+                numIter: 10000,
+                initialTemp: 300,
+                coolingFactor: 0.95,
+                minTemp: 1.0
             },
             container: document.getElementById('panel-graph'),
             elements: makeGraphElements(),
