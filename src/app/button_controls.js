@@ -16,7 +16,7 @@ function getParsedQuery() {
     const fromDiv = document.getElementById("query-from")
     if (document.getElementById("query-from-tag").value !== "") {
         fromDiv.disabled = false
-        result.from = document.getElementById("query-from-tag").value
+        result.from = fromDiv.value
     } else {
         fromDiv.disabled = true
     }
