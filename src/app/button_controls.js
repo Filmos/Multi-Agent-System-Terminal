@@ -4,6 +4,13 @@ function getParsedQuery() {
         target: {}
     }
 
+    if (document.getElementById("query-tag").value == "") {
+        document.getElementById("query-from-tag").value = ""
+        document.getElementById("query-from-tag").disabled = true
+    } else {
+        document.getElementById("query-from-tag").disabled = false
+    }
+
     const targetType = document.getElementById("query-target-type").value
     if (targetType === "(fluent)") {
         result.target.type = "fluent"
