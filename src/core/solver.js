@@ -1,7 +1,70 @@
 function solve(program, query) {
     if (!query.target.fluent && !query.target.agent) throw new Error("No target specified")
     // TODO @Alu: Implement this
+    states_fluents=get_all_states(program)
+    var states = states_fluents[0]
+    var fluents = states_fluents[1]
+    var final_score = 0
+
     console.log(program, query)
+    if (query.tag=='') {
+        initial_state = Array.from(program.initial_state);
+        fluents.forEach(fluent => {
+        if(!initial_state.includes(fluent)){
+            initial_state.push(make_negative(fluent))
+        }
+    });
+    initial_state = new Array(initial_state.sort(endComparator))
+    } 
+    else {
+        if (typeof query.from === 'undefined' || query.from == '') {
+            initial_state = states
+        } 
+        else {
+            fixed_fluents = query.from.split(', ')
+            unfixed_fluents = new Array()
+            fluents.forEach(fluent => {if (!fixed_fluents.includes(fluent) && !fixed_fluents.includes(make_negative(fluent))) {unfixed_fluents.push(fluent)}});
+            initial_state = getAllSubsets(unfixed_fluents).map(state => state.concat(fixed_fluents));
+            initial_state.forEach(state => {fluents.forEach(fluent => {
+                if (!state.includes(fluent) && !state.includes(make_negative(fluent))) {
+                    state.push(make_negative(fluent))
+                }});});
+            initial_state.forEach(state => {state.sort(endComparator)});
+        }
+    }
+    edges = new Array()
+    final_states = new Array()
+    if (query.target.type == "fluent"){
+        initial_state.forEach(state => {program.action_execution.forEach(exec => {
+            edge = make_edge(program,fluents,state,exec.agents,exec.action)
+            if(typeof edge !== 'undefined'){
+                edges.push(edge)
+                state = edge.to.split(', ')
+            }
+            if (exec==program.action_execution[program.action_execution.length - 1]) {
+                final_states.push(edge.to.split(', '))
+            }
+        });});
+        final_states.forEach(state => {
+            if (state.includes(query.target.fluent)) {
+                final_score+=1
+        }});
+        final_score = final_score/final_states.length
+        if (query.tag=='' || query.tag=='necessary') {
+            return final_score==1
+        }
+        else{
+            return final_score>0
+        }
+    }
+    else{
+        
+    }
+
+
+
+
+
     return Math.random() > 0.5
 }
 
@@ -19,11 +82,7 @@ function makeGraph(program) {
         edge = make_edge(program,fluents,state,agent,action)
         if(typeof edge !== 'undefined'){
             edges.push(edge)}
-    });
-        
-    });
-        
-    });
+    });});});
     return {
         nodes: nodes,
         edges: edges
@@ -94,7 +153,7 @@ function get_all_states(program){
         }
     });});
     all_fluent_subsets.forEach(element => {element.sort(endComparator)});
-    console.log(all_fluent_subsets)
+    //console.log(all_fluent_subsets)
     return [all_fluent_subsets,all_fluents]
 }
 
@@ -111,7 +170,7 @@ function get_all_agents(program){
     all_agents = Array.from(all_agents)
     all_agents_subsets = getAllSubsets(all_agents)
     all_agents_subsets = all_agents_subsets.filter(element => element.length!=0)
-    console.log(all_agents_subsets)
+    //console.log(all_agents_subsets)
     return all_agents_subsets
 }
 
@@ -119,7 +178,7 @@ function get_all_actions(program){
     all_actions = new Set()
     program.action_rules.forEach(rule => {all_actions.add(rule.action)});
     all_actions = Array.from(all_actions)
-    console.log(all_actions)
+    //console.log(all_actions)
     return all_actions
 }
 
@@ -174,7 +233,7 @@ function make_edge(program, fluents, state, agents, action){
         }
     }
     out_state=state
-    console.log(choosen_action)
+    //console.log(choosen_action)
     if (choosen_action == null){
         return {from:state.join(", "),to:state.join(", "),label:action+" "+agents.join(", ")}
     }
