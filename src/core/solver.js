@@ -33,16 +33,20 @@ function solve(program, query) {
         }
     }
     edges = new Array()
+    edges_no_agent = new Array()
     final_states = new Array()
+    final_labels = new Array()
     if (query.target.type == "fluent"){
+        console.log(initial_state)
         initial_state.forEach(state => {program.action_execution.forEach(exec => {
             edge = make_edge(program,fluents,state,exec.agents,exec.action)
             if(typeof edge !== 'undefined'){
+                edge=edge[0]
                 edges.push(edge)
                 state = edge.to.split(', ')
             }
             if (exec==program.action_execution[program.action_execution.length - 1]) {
-                final_states.push(edge.to.split(', '))
+                final_states.push(edges[edges.length - 1].to.split(', '))
             }
         });});
         final_states.forEach(state => {
@@ -50,6 +54,7 @@ function solve(program, query) {
                 final_score+=1
         }});
         final_score = final_score/final_states.length
+        console.log(edges)
         if (query.tag=='' || query.tag=='necessary') {
             return final_score==1
         }
@@ -57,15 +62,95 @@ function solve(program, query) {
             return final_score>0
         }
     }
-    else{
-        
+    else if (query.target.type == "active") {
+        console.log(initial_state)
+        initial_state.forEach(state => {
+            flag = false
+            program.action_execution.forEach(exec => {
+            edge = make_edge(program,fluents,state,exec.agents,exec.action)
+            if(typeof edge !== 'undefined'){
+                edges.push(edge[0])
+                console.log(edge)
+                state = edge[0].to.split(', ')
+                if (edge[0].label.includes(query.target.agent) && edge[1]==true) {
+                    flag=true
+                }
+            }
+            });
+            if (flag) {
+                flag = false
+                final_score+=1
+            }});
+        console.log(final_score)
+        final_score = final_score/initial_state.length
+        console.log(edges)
+        if (query.tag=='' || query.tag=='necessary') {
+            return final_score==1
+        }
+        else{
+            return final_score>0
+        }
+    } else {
+        active_array = new Array()
+        is_active=false
+        console.log(initial_state)
+        initial_state.forEach(state => {
+            flag = false
+            program.action_execution.forEach(exec => {
+            edge = make_edge(program,fluents,state,exec.agents,exec.action)
+            if(typeof edge !== 'undefined'){
+                edges.push(edge[0])
+                console.log(edge)
+                state = edge[0].to.split(', ')
+                if (edge[0].label.includes(query.target.agent) && edge[1]==true) {
+                    flag=true
+                }
+            }
+            });
+            active_array.push(flag)
+            if (flag) {
+                flag = false
+                final_score+=1
+            }});
+        initial_state.forEach(state => {
+            flag = false
+            program.action_execution.forEach(exec => {
+            edge = make_edge(program,fluents,state,exec.agents.filter(agent => agent!=query.target.agent),exec.action)
+            if(typeof edge !== 'undefined'){
+                edges_no_agent.push(edge[0])
+                console.log(edge)
+                state = edge[0].to.split(', ')
+                if (edge[0].label.includes(query.target.agent) && edge[1]==true) {
+                    flag=true
+                }
+            }
+            });
+            if (flag) {
+                flag = false
+                final_score+=1
+            }});
+            console.log(active_array)
+            console.log(edges)
+            console.log(edges_no_agent)
+            final_score=0
+            counter=0
+            for (let index = program.action_execution.length-1; index < edges.length; index=index+program.action_execution.length) {
+                console.log(edges[index],edges_no_agent[index],active_array[counter])
+                if(edges[index].to != edges_no_agent[index].to && active_array[counter]){
+                    final_score+=1
+                }
+                counter+=1
+            }
+            
+            final_score=final_score/initial_state.length
+            console.log(final_score)
+            if (query.tag=='' || query.tag=='necessary') {
+                return final_score==1
+            }
+            else{
+                return final_score>0
+            }
     }
-
-
-
-
-
-    return Math.random() > 0.5
 }
 
 function makeGraph(program) {
@@ -81,6 +166,7 @@ function makeGraph(program) {
     states.forEach(state => {agents.forEach(agent => {actions.forEach(action => {
         edge = make_edge(program,fluents,state,agent,action)
         if(typeof edge !== 'undefined'){
+            edge=edge[0]
             edges.push(edge)}
     });});});
     return {
@@ -235,7 +321,7 @@ function make_edge(program, fluents, state, agents, action){
     out_state=state
     //console.log(choosen_action)
     if (choosen_action == null){
-        return {from:state.join(", "),to:state.join(", "),label:action+" "+agents.join(", ")}
+        return [{from:state.join(", "),to:state.join(", "),label:action+" "+agents.join(", ")},false]
     }
     choosen_action.effect.forEach(effect => {
         out_state=arrayRemove(out_state,make_positive(effect))
@@ -252,6 +338,6 @@ function make_edge(program, fluents, state, agents, action){
     });
     out_state=out_state.sort(endComparator)
 
-    return {from:state.join(", "),to:out_state.join(", "),label:action+" "+agents.join(", ")}
+    return [{from:state.join(", "),to:out_state.join(", "),label:action+" "+agents.join(", ")},condition]
 }
 module.exports = {solve, makeGraph}
