@@ -15,14 +15,14 @@ define("app/syntax_highlight_rules", ["require", "exports", "module", "ace/lib/o
         this.$rules = {
             "start": [
                 ...common,
-                { token: "keyword", regex: "^\\s*(?:noninertial|initially)", next: "raw_fluents" },
+                { token: "keyword", regex: "^\\s*(?:initially)", next: "raw_fluents" },
                 { token: "keyword", regex: "^\\s*impossible", next: "action_impossible_pre" },
                 { token: ["variable.parameter", "text", "keyword"], regex: "^(\\s*-?[a-z_]+)(\\s+)(after)", next: "fluents" },
                 { token: "entity.name.function", regex: "^\\s*[A-Z_]+", next: "action_definition_or_invocation" }
             ],
             "raw_fluents": [
                 ...common,
-                { token: "variable.parameter", regex: "\\s[a-z_]+" }
+                { token: "variable.parameter", regex: "\\s-?[a-z_]+" }
             ],
             "fluents": [
                 ...common,

@@ -19,7 +19,7 @@
             <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#main-tab-pane"
                 type="button" role="tab" aria-controls="main-tab-pane" aria-selected="true">Definition</button>
         </li>
-        <li class="nav-item" role="presentation">
+        <li class="nav-item" role="presentation" style="display: none">
             <button class="nav-link" id="query-tab" data-bs-toggle="tab" data-bs-target="#query-tab-pane" type="button"
                 role="tab" aria-controls="query-tab-pane" aria-selected="false">Query</button>
         </li>
@@ -31,27 +31,27 @@
     <div class="tab-content" id="myTabContent">
         <div class="tab-pane fade show active" id="main-tab-pane" role="tabpanel" aria-labelledby="main-tab"
             tabindex="0">
-            <div class="panel-container">
+            <div class="panel-container with-query">
                 <div class="panel panel-vertical panel-padded" id="panel-dropdown">
-                    <div class="mb-3">
+                    <div class="mb-3" id="dropdown-initial-state">
                         <p class="h5">Initial state</p>
-                        <textarea class="form-control fluents" id="dropdown-initial" rows="3"></textarea>
+                        <div class="input-group mb-3 d-none">
+                            <input type="text" class="form-control dropdown-fluent">
+                        </div>
                     </div>
-                    <div class="mb-3" id="dropdown-noninertial-fluents">
+                    <div class="mb-3" id="dropdown-domain-constraints">
+                        <p class="h5">Domain constraints</p>
+                        <div class="input-group mb-3 d-none">
+                            <span class="input-group-text">always</span>
+                            <input type="text" class="form-control dropdown-constraint">
+                        </div>
+                    </div>
+                    <div class="mb-3" id="dropdown-value-statements">
                         <p class="h5">Value statements</p>
                         <div class="input-group mb-3 d-none">
                             <input type="text" class="form-control dropdown-fluent limit-size">
                             <span class="input-group-text">after</span>
-                            <input type="text" class="form-control dropdown-condition">
-                        </div>
-                    </div>
-                    <div class="mb-3" id="dropdown-prohibitions">
-                        <p class="h5">Prohibition statements</p>
-                        <div class="input-group mb-3 d-none">
-                            <span class="input-group-text">impossible</span>
-                            <input type="text" class="form-control dropdown-action limit-size">
-                            <span class="input-group-text">if</span>
-                            <input type="text" class="form-control dropdown-condition">
+                            <input type="text" class="form-control dropdown-actions">
                             <span class="input-group-text">by</span>
                             <input type="text" class="form-control dropdown-agents">
                         </div>
@@ -70,21 +70,6 @@
                     </div>
                 </div>
                 <div id="editor" class="panel panel-vertical"></div>
-                <p class="editor-locator"></p>
-            </div>
-        </div>
-        <div class="tab-pane fade" id="query-tab-pane" role="tabpanel" aria-labelledby="query-tab" tabindex="0">
-            <div class="panel-container with-query">
-                <div class="panel panel-vertical panel-padded" id="panel-dropdown">
-                    <div class="mb-3" id="dropdown-action-execution">
-                        <p class="h5">Program</p>
-                        <div class="input-group mb-3 d-none">
-                            <input type="text" class="form-control dropdown-action limit-size">
-                            <span class="input-group-text">by</span>
-                            <input type="text" class="form-control dropdown-agents">
-                        </div>
-                    </div>
-                </div>
                 <p class="editor-locator"></p>
             </div>
             <div class="panel panel-horizontal">
@@ -109,6 +94,21 @@
                     <button type="button" id="query-button" class="btn btn-secondary">?</button>
                 </div>
                 <div id="query-result"></div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="query-tab-pane" role="tabpanel" aria-labelledby="query-tab" tabindex="0">
+            <div class="panel-container">
+                <div class="panel panel-vertical panel-padded" id="panel-dropdown">
+                    <div class="mb-3" id="dropdown-action-execution">
+                        <p class="h5">Program</p>
+                        <div class="input-group mb-3 d-none">
+                            <input type="text" class="form-control dropdown-action limit-size">
+                            <span class="input-group-text">by</span>
+                            <input type="text" class="form-control dropdown-agents">
+                        </div>
+                    </div>
+                </div>
+                <p class="editor-locator"></p>
             </div>
         </div>
         <div class="tab-pane fade" id="graph-tab-pane" role="tabpanel" aria-labelledby="graph-tab" tabindex="0">

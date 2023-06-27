@@ -8,26 +8,15 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
         showGutter: false,
         showPrintMargin: false,
     });
-    editor.setValue(`% Noninertial rules
-    noninertial fleeing
-    -fleeing after -alive
+    editor.setValue(`initially alive
+    initially -broken
+    always running -> alive
 
-    % Initial state
-    initially alive, loaded
-
-    % Prohibition statements 
-    impossible ATTACK by deer
-    impossible FLEE by hunter
-
-    % Action statements
-    FLEE causes fleeing by deer
-    ATTACK causes -alive if loaded and -fleeing by hunter
-    ATTACK causes -loaded by hunter
-    
-
-    % Actions execution
-    FLEE by deer
-    ATTACK by hunter`.replace(/\n[ ]*/g, '\n'), -1)
+    loaded after SHOOT by {hunter}
+    LOAD causes loaded by {hunter}
+    SHOOT causes -loaded by {hunter}
+    SHOOT causes -alive if loaded and -broken by {hunter}
+    `.replace(/\n[ ]*/g, '\n'), -1)
 
     let lastTimeout = null;
     let ignoreNext = false;
@@ -48,11 +37,9 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
     function parseProgram() {
         let result = {
             initial_state: new Set(),
-            noninertial_fluents: new Set(),
-            noninertial_rules_fluents: [],
-            prohibitions: [],
             action_rules: [],
-            action_execution: [],
+            value_statements: [],
+            domain_constraints: []
         }
         let text = editor.getValue();
         let lines = text.split('\n');
@@ -64,12 +51,10 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
                 let keyword = line.split(' ')[0];
 
                 const invalidLine = () => { throw "Invalid line" }
-                if (keyword == 'initially') line.substring(keyword.length).split(',').map(f => f.trim()).filter(f => f.length > 0 && f[0] != '-').forEach(f => result['initial_state'].add(f));
-                else if (keyword == 'noninertial') line.substring(keyword.length).split(',').map(f => f.trim()).filter(f => f.length > 0 && (f[0] != '-' || invalidLine())).forEach(f => result['noninertial_fluents'].add(f));
-                else if (keyword == 'impossible') result['prohibitions'].push((r => ({ action: r[1], condition: r[2], agents: r[3] }))(line.match(/^impossible\s+([A-Z_]*)\s+(?:if\s+(.+?)\s+)?(?:by\s+(.+?))?$/)));
-                else if (line.match(/^(-?[a-z_]+)\s+after\s+([-()a-z_ ]+)$/)) result['noninertial_rules_fluents'].push((r => ({ fluent: r[1], condition: r[2] }))(line.match(/^(-?[a-z_]+)\s+after\s+([-()a-z_ ]+)$/)));
-                else if (line.match(/^[A-Z_]*\s+causes\s/)) result['action_rules'].push((r => ({ action: r[1], effect: r[2].split(',').map(f => f.trim()), condition: r[3], agents: r[4] }))(line.match(/^([A-Z_]*)\s+causes\s+(.+?)\s+(?:if\s+(.+)\s+)?(?:by\s+(.+))/)));
-                else if (line.match(/^[A-Z_]*\s+by\s/)) result['action_execution'].push((r => ({ action: r[1], agents: r[2].split(',').map(f => f.trim()) }))(line.match(/^([A-Z_]*)\s+by\s+(.+)/)));
+                if (keyword == 'initially') line.substring(keyword.length).split(',').map(f => f.trim()).filter(f => f.length > 0).forEach(f => result['initial_state'].add(f));
+                else if (line.match(/^always/)) result['domain_constraints'].push(line.match(/^always\s+(.+)/)[1]);
+                else if (line.match(/^-?[a-z_]*\s+after\s/)) result['value_statements'].push((r => ({ fluent: r[1], actions: r[2], agents: r[3] }))(line.match(/^(-?[a-z_]*)\s+after\s+(.+?)\s+by\s+(.+)/)));
+                else if (line.match(/^[A-Z_]*\s+causes\s/)) result['action_rules'].push((r => ({ action: r[1], effect: r[2], condition: r[3], agents: r[4].replace(/[{}]/g, '') }))(line.match(/^([A-Z_]*)\s+causes\s+(.+?)\s+(?:if\s+(.+)\s+)?(?:by\s+(.+))/)));
                 else invalidLine();
             } catch (e) {
                 // TODO: underline the line, prevent formatting
@@ -85,20 +70,16 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
         var formatted = '';
 
         formatted += '% Initial state\n';
-        if (result.initial_state.size > 0) formatted += 'initially ' + [...result.initial_state].join(', ') + '\n';
+        formatted += [...result.initial_state].map(f => `initially ${f}\n`).join('');
+
+        formatted += '\n% Domain constraints\n';
+        formatted += result.domain_constraints.map(r => 'always ' + r + '\n').join('');
 
         formatted += '\n% Value statements\n';
-        if (result.noninertial_fluents.size > 0) formatted += 'noninertial ' + [...result.noninertial_fluents].join(', ') + '\n';
-        formatted += result.noninertial_rules_fluents.map(r => r.fluent + ' after ' + r.condition + '\n').join('');
-
-        formatted += '\n% Prohibition statements\n';
-        formatted += result.prohibitions.map(r => 'impossible ' + r.action + (r.condition ? ' if ' + r.condition : '') + (r.agents ? ' by ' + r.agents : '') + '\n').join('');
+        formatted += result.value_statements.map(r => r.fluent + ' after ' + r.actions + ' by ' + r.agents + '\n').join('');
 
         formatted += '\n% Action statements\n';
-        formatted += result.action_rules.map(r => r.action + ' causes ' + r.effect.join(', ') + (r.condition ? ' if ' + r.condition : '') + (r.agents ? ' by ' + r.agents : '') + '\n').join('');
-
-        formatted += '\n% Program\n';
-        formatted += result.action_execution.map(r => r.action + ' by ' + r.agents.join(', ') + '\n').join('');
+        formatted += result.action_rules.map(r => r.action + ' causes ' + r.effect + (r.condition ? ' if ' + r.condition : '') + (r.agents ? ` by {${r.agents}}` : '') + '\n').join('');
 
 
 

@@ -1,26 +1,22 @@
 function parseDropdowns() {
     let result = {
         initial_state: new Set(),
-        noninertial_fluents: new Set(),
-        noninertial_rules_fluents: [],
-        prohibitions: [],
         action_rules: [],
-        action_execution: [],
+        value_statements: [],
+        domain_constraints: []
     }
 
-    result["initial_state"] = new Set(document.getElementById("dropdown-initial").value.split(",").map((x) => x.trim()).filter(f => f.length > 0 && f[0] != '-'))
-    readGUI("dropdown-noninertial-fluents", (e) => {
-        result["noninertial_fluents"].add(e.fluent[0] == '-' ? e.fluent.substring(1) : e.fluent)
-        result["noninertial_rules_fluents"].push({ fluent: e.fluent, condition: e.condition })
+    readGUI("dropdown-initial-state", (e) => {
+        result["initial_state"].add(e.fluent)
     })
-    readGUI("dropdown-prohibitions", (e) => {
-        result["prohibitions"].push({ action: e.action, condition: e.condition, agents: e.agents })
+    readGUI("dropdown-domain-constraints", (e) => {
+        result["domain_constraints"].push(e.constraint)
+    })
+    readGUI("dropdown-value-statements", (e) => {
+        result["value_statements"].push({ fluent: e.fluent, actions: e.actions, agents: e.agents })
     })
     readGUI("dropdown-action-rules", (e) => {
-        result["action_rules"].push({ action: e.action, effect: e.effect.split(",").map((x) => x.trim()), condition: e.condition, agents: e.agents })
-    })
-    readGUI("dropdown-action-execution", (e) => {
-        result["action_execution"].push({ action: e.action, condition: e.condition, agents: e.agents.split(",").map((x) => x.trim()) })
+        result["action_rules"].push({ action: e.action, effect: e.effect, condition: e.condition, agents: e.agents })
     })
 
     setProgram(result)
@@ -38,11 +34,10 @@ function readGUI(parent, callback) {
 
 
 function fillDropdowns(program) {
-    document.getElementById("dropdown-initial").innerText = Array.from(program["initial_state"].values()).join(", ")
-    makeGUI("dropdown-noninertial-fluents", program["noninertial_rules_fluents"], (e) => ({ "fluent": e.fluent, "condition": e.condition }))
-    makeGUI("dropdown-prohibitions", program["prohibitions"], (e) => ({ "action": e.action, "condition": e.condition, "agents": e.agents }))
-    makeGUI("dropdown-action-rules", program["action_rules"], (e) => ({ "action": e.action, "effect": e.effect.join(", "), "condition": e.condition, "agents": e.agents }))
-    makeGUI("dropdown-action-execution", program["action_execution"], (e) => ({ "action": e.action, "agents": e.agents.join(", ") }))
+    makeGUI("dropdown-initial-state", [...program["initial_state"]], (e) => ({ "fluent": e }))
+    makeGUI("dropdown-domain-constraints", program["domain_constraints"], (e) => ({ "constraint": e }))
+    makeGUI("dropdown-value-statements", program["value_statements"], (e) => ({ "fluent": e.fluent, "actions": e.actions, "agents": e.agents }))
+    makeGUI("dropdown-action-rules", program["action_rules"], (e) => ({ "action": e.action, "effect": e.effect, "condition": e.condition, "agents": e.agents }))
 }
 
 function makeGUI(parent, source, mapping) {

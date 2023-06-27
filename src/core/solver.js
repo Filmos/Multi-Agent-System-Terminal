@@ -1,4 +1,20 @@
+function preprocess(program) {
+    program = JSON.parse(JSON.stringify(program))
+    program.value_statements.forEach(exec => {
+        exec.actions = exec.actions.split(",").map((x) => x.trim()).filter(x => x.length > 0)
+        exec.agents = exec.agents.split("}").map((x) => new Set(x.split(/[{,]/).map(y => y.trim()).filter(y => y.length > 0))).filter(x => x.size > 0)
+    })
+    program.action_rules.forEach(exec => {
+        exec.effect = exec.effect.split(",").map((x) => x.trim()).filter(x => x.length > 0)
+    })
+    return program
+}
+
 function solve(program, query) {
+    program = preprocess(program)
+    console.log(program, query)
+    return 42
+
     if (!query.target.fluent && !query.target.agent) throw new Error("No target specified")
     // TODO @Alu: Implement this
     states_fluents=get_all_states(program)
@@ -154,6 +170,8 @@ function solve(program, query) {
 }
 
 function makeGraph(program) {
+    program = preprocess(program)
+
     var nodes = {}
     var edges = []
     var actions = get_all_actions(program)
