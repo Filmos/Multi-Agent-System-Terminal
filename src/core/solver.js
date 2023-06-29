@@ -17,11 +17,13 @@ function preprocess(program) {
 function solve(program, query) {
     program = preprocess(program)
     console.log(program, query)
-    return 42
+    
 
     if (!query.target.fluent && !query.target.agent) throw new Error("No target specified")
     // TODO @Alu: Implement this
     states_fluents=get_all_states(program)
+    console.log(states_fluents)
+    return 42
     var states = states_fluents[0]
     var fluents = states_fluents[1]
     var final_score = 0
@@ -234,24 +236,17 @@ function endComparator(a,b) {
 
 function get_all_states(program){
     // get fluents from initial_state
-    all_fluents = program.initial_state
-
-    // get fluents from noninertial_fluents
-    all_fluents = new Set([...all_fluents, ...program.noninertial_fluents]);
-
-    // get fluents from noninertial_rules_fluents
-    program.noninertial_rules_fluents.forEach(rule => {rule.condition.split(" and ").forEach(element_and => {element_and.split(" or ").forEach(element_and_or => {all_fluents.add(make_positive(element_and_or))
-        });});});
+    all_fluents = new Set()
+    program.initial_state.forEach(element => {all_fluents.add(make_positive(element))});
 
     // get fluents from action_rules
     program.action_rules.forEach(element => {element.effect.forEach(effect => {all_fluents.add(make_positive(effect))
     });});
     program.action_rules.forEach(element => {
         if (typeof element.condition !== 'undefined'){
-            element.condition.split(" and ").forEach(element_and => {element_and.split(" or ").forEach(element_and_or => {all_fluents.add(make_positive(element_and_or))
-            });});
-        }
-        });
+            element.condition.split(" and ").forEach(element_and => {all_fluents.add(make_positive(element_and))
+            });
+        }});
     
     // create all possible subsets
     var all_fluent_subsets = getAllSubsets(Array.from(all_fluents))
@@ -262,13 +257,12 @@ function get_all_states(program){
     });});
     all_fluent_subsets.forEach(element => {element.sort(endComparator)});
     //console.log(all_fluent_subsets)
+    // TODO: is initial state subset of every state
     return [all_fluent_subsets,all_fluents]
 }
 
 function get_all_agents(program){
     all_agents = new Set()
-    // get agents from prohibitions
-    program.prohibitions.forEach(prohib => {prohib.agents.split(', ').forEach(agent => {all_agents.add(agent)});});
 
     // get agents from action_rules
     program.action_rules.forEach(action => {action.agents.split(', ').forEach(agent => {all_agents.add(agent)});});
@@ -279,6 +273,8 @@ function get_all_agents(program){
     all_agents_subsets = getAllSubsets(all_agents)
     all_agents_subsets = all_agents_subsets.filter(element => element.length!=0)
     //console.log(all_agents_subsets)
+    
+    //TODO: agents from value statements
     return all_agents_subsets
 }
 
