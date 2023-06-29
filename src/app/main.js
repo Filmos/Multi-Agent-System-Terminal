@@ -21,17 +21,11 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
     let lastTimeout = null;
     let ignoreNext = false;
     editor.session.on('change', function (delta) {
-        if (lastTimeout) { clearTimeout(lastTimeout); lastTimeout = null }
         if (ignoreNext) { return }
-        lastTimeout = setTimeout(parseProgram, 3500);
+        parseProgram()
     });
 
-    function accelarateParse() {
-        if (!lastTimeout) return;
-        clearTimeout(lastTimeout);
-        lastTimeout = null;
-        parseProgram();
-    }
+    function accelarateParse() { }
 
     setTimeout(parseProgram, 100);
     function parseProgram() {
@@ -54,7 +48,7 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
                 if (keyword == 'initially') line.substring(keyword.length).split(',').map(f => f.trim()).filter(f => f.length > 0).forEach(f => result['initial_state'].add(f));
                 else if (line.match(/^always/)) result['domain_constraints'].push(line.match(/^always\s+(.+)/)[1]);
                 else if (line.match(/^.+\s+after\s/)) result['value_statements'].push((r => ({ fluent: r[1], actions: r[2], agents: r[3] }))(line.match(/^(.+)\s+after\s+(.+?)\s+by\s+(.+)/)));
-                else if (line.match(/^[A-Z_]*\s+causes\s/)) result['action_rules'].push((r => ({ action: r[1], effect: r[2], condition: r[3], agents: r[4].replace(/[{}]/g, '') }))(line.match(/^([A-Z_]*)\s+causes\s+(.+?)\s+(?:if\s+(.+)\s+)?(?:by\s+(.+))/)));
+                else if (line.match(/^[A-Z_]*\s+causes\s/)) result['action_rules'].push((r => ({ action: r[1], effect: r[2], condition: r[3], agents: (r[4] || "").replace(/[{}]/g, '') }))(line.match(/^([A-Z_]*)\s+causes\s+(.+?)(?:\s+if\s+(.+?))?(?:\s+by\s+(.+))?\s*$/)));
                 else invalidLine();
             } catch (e) {
                 // TODO: underline the line, prevent formatting
@@ -63,25 +57,16 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
 
         }
 
-        setProgram(result);
+        setProgram(result, false);
     }
 
     function formatProgram(result) {
         var formatted = '';
 
-        formatted += '% Initial state\n';
         formatted += [...result.initial_state].map(f => `initially ${f}\n`).join('');
-
-        formatted += '\n% Domain constraints\n';
         formatted += result.domain_constraints.map(r => 'always ' + r + '\n').join('');
-
-        formatted += '\n% Value statements\n';
         formatted += result.value_statements.map(r => r.fluent + ' after ' + r.actions + ' by ' + r.agents + '\n').join('');
-
-        formatted += '\n% Action statements\n';
         formatted += result.action_rules.map(r => r.action + ' causes ' + r.effect + (r.condition ? ' if ' + r.condition : '') + (r.agents ? ` by {${r.agents}}` : '') + '\n').join('');
-
-
 
         ignoreNext = true;
         setTimeout(() => { ignoreNext = false }, 100);
