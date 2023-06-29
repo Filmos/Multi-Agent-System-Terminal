@@ -8,11 +8,11 @@ define("app/syntax_highlight_rules", ["require", "exports", "module", "ace/lib/o
         this.$rules = {
             "start": [
                 { token: "comment", regex: "%.+" },
-                { token: ["text", "keyword"], regex: "(^|\\W)(initially|after|causes|by|if|always)(?=\\s|$)" },
-                { token: "constant.language.boolean", regex: "(\\s)(and|or|->)(?=\\s|$)" },
-                { token: "variable.parameter", regex: "(?!-)(^|\\W)(-?[a-z]+)(?=\\s|$)" },
+                { token: ["text", "keyword"], regex: "(^|\\W)(initially|after|causes|by|if|always)(?=\\W|$)" },
+                { token: ["text", "constant.language.boolean"], regex: "(\\s)(and|or|->)(?=\\s|$)" },
                 { token: "text", regex: "{", next: "agents" },
-                { token: "entity.name.function", regex: "(^|\\W)([A-Z_]+)(?=\\s|$)" }
+                { token: ["text", "variable.parameter"], regex: "(?!-)(^|\\W)(-?[a-z]+)(?=\\W|$)" },
+                { token: ["text", "entity.name.function"], regex: "(^|\\W)([A-Z_]+)(?=\\W|$)" }
             ],
             "agents": [
                 { token: "storage.type", regex: "[a-z]+" },

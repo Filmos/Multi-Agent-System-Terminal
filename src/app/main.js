@@ -15,7 +15,7 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
     loaded after SHOOT by {hunter}
     LOAD causes loaded by {hunter}
     SHOOT causes -loaded by {hunter}
-    SHOOT causes -alive if loaded and -broken by {hunter}
+    SHOOT causes -alive if loaded, -broken by {hunter}
     `.replace(/\n[ ]*/g, '\n'), -1)
 
     let lastTimeout = null;
@@ -53,7 +53,7 @@ define("app/main", ["require", "exports", "module", "app/syntax_highlight_rules"
                 const invalidLine = () => { throw "Invalid line" }
                 if (keyword == 'initially') line.substring(keyword.length).split(',').map(f => f.trim()).filter(f => f.length > 0).forEach(f => result['initial_state'].add(f));
                 else if (line.match(/^always/)) result['domain_constraints'].push(line.match(/^always\s+(.+)/)[1]);
-                else if (line.match(/^-?[a-z_]*\s+after\s/)) result['value_statements'].push((r => ({ fluent: r[1], actions: r[2], agents: r[3] }))(line.match(/^(-?[a-z_]*)\s+after\s+(.+?)\s+by\s+(.+)/)));
+                else if (line.match(/^.+\s+after\s/)) result['value_statements'].push((r => ({ fluent: r[1], actions: r[2], agents: r[3] }))(line.match(/^(.+)\s+after\s+(.+?)\s+by\s+(.+)/)));
                 else if (line.match(/^[A-Z_]*\s+causes\s/)) result['action_rules'].push((r => ({ action: r[1], effect: r[2], condition: r[3], agents: r[4].replace(/[{}]/g, '') }))(line.match(/^([A-Z_]*)\s+causes\s+(.+?)\s+(?:if\s+(.+)\s+)?(?:by\s+(.+))/)));
                 else invalidLine();
             } catch (e) {
