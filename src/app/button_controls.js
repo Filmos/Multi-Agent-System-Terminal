@@ -1,31 +1,8 @@
 function getParsedQuery() {
     const result = {
-        tag: document.getElementById("query-tag").value,
-        target: {}
-    }
-
-    if (document.getElementById("query-tag").value == "") {
-        document.getElementById("query-from-tag").value = ""
-        document.getElementById("query-from-tag").disabled = true
-    } else {
-        document.getElementById("query-from-tag").disabled = false
-    }
-
-    const targetType = document.getElementById("query-target-type").value
-    if (targetType === "(fluent)") {
-        result.target.type = "fluent"
-        result.target.fluent = document.getElementById("query-target").value
-    } else {
-        result.target.type = targetType
-        result.target.agent = document.getElementById("query-target").value
-    }
-
-    const fromDiv = document.getElementById("query-from")
-    if (document.getElementById("query-from-tag").value !== "") {
-        fromDiv.disabled = false
-        result.from = fromDiv.value
-    } else {
-        fromDiv.disabled = true
+        type: document.getElementById("query-type").value,
+        target: document.getElementById("query-target").value,
+        actions: document.getElementById("query-program").value,
     }
 
     return result
