@@ -1,9 +1,13 @@
 function preprocess(program) {
-    program = JSON.parse(JSON.stringify(program))
+    program = { ...program }
+
+    program.value_statements = JSON.parse(JSON.stringify(program.value_statements))
     program.value_statements.forEach(exec => {
         exec.actions = exec.actions.split(",").map((x) => x.trim()).filter(x => x.length > 0)
         exec.agents = exec.agents.split("}").map((x) => new Set(x.split(/[{,]/).map(y => y.trim()).filter(y => y.length > 0))).filter(x => x.size > 0)
     })
+
+    program.action_rules = JSON.parse(JSON.stringify(program.action_rules))
     program.action_rules.forEach(exec => {
         exec.effect = exec.effect.split(",").map((x) => x.trim()).filter(x => x.length > 0)
     })
