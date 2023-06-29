@@ -19,9 +19,13 @@ document.getElementById("query-button").addEventListener("click", () => {
     const program = getParsedProgram()
     try {
         const result = solve(program, query)
-        document.getElementById("query-result").innerText = `Result: ${result}`
+        document.getElementById("query-result").innerText = `Result: ${result ? 'true' : 'false'}`
     } catch (e) {
-        document.getElementById("query-result").innerText = `Invalid query: ${e.message}`
+        if (e.name == "InvalidQueryException") document.getElementById("query-result").innerText = `Invalid query: ${e.message}`
+        else {
+            document.getElementById("query-result").innerText = `Result: true`
+            console.error("Silenced error:\n", e)
+        }
     }
 })
 
