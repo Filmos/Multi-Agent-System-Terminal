@@ -11,8 +11,8 @@ define("app/syntax_highlight_rules", ["require", "exports", "module", "ace/lib/o
                 { token: ["text", "keyword"], regex: "(^|\\W)(initially|after|causes|by|if|always)(?=\\W|$)" },
                 { token: ["text", "constant.language.boolean"], regex: "(\\s)(and|or|->)(?=\\s|$)" },
                 { token: "text", regex: "{", next: "agents" },
-                { token: ["text", "variable.parameter"], regex: "(?!-)(^|\\W)(-?[a-z]+)(?=\\W|$)" },
-                { token: ["text", "entity.name.function"], regex: "(^|\\W)([A-Z_]+)(?=\\W|$)" }
+                { token: ["text", "variable.parameter"], regex: "(^|(?!-)\\W)(-?[a-z][a-z_]*)(?=\\W|$)" },
+                { token: ["text", "entity.name.function"], regex: "(^|\\W)([A-Z][A-Z_]*)(?=\\W|$)" }
             ],
             "agents": [
                 { token: "storage.type", regex: "[a-z]+" },
