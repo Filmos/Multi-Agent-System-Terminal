@@ -26,14 +26,16 @@ function preprocess(program) {
 
 function solve(program, query) {
     program = preprocess(program)
-    throw new InvalidQueryException("No target specified")
+    //throw new InvalidQueryException("No target specified")
     console.log(program, query)
     
 
-    if (!query.target.fluent && !query.target.agent) throw new InvalidQueryException("No target specified")
+    if (!query.target) throw new InvalidQueryException("No target specified")
+    if (!query.actions) throw new InvalidQueryException("No program specified")
     // TODO @Alu: Implement this
     states_fluents=get_all_states(program)
-    console.log(states_fluents)
+    agents=get_all_agents(program)
+    console.log(agents)
     return 42
     var states = states_fluents[0]
     var fluents = states_fluents[1]
@@ -250,15 +252,20 @@ function get_all_states(program){
     all_fluents = new Set()
     program.initial_state.forEach(element => {all_fluents.add(make_positive(element))});
 
-    // get fluents from action_rules
-    program.action_rules.forEach(element => {element.effect.forEach(effect => {all_fluents.add(make_positive(effect))
-    });});
+    // get fluents from actions
+    program.action_rules.forEach(element => {element.effect.forEach(effect => {all_fluents.add(make_positive(effect))});});
     program.action_rules.forEach(element => {
         if (typeof element.condition !== 'undefined'){
-            element.condition.split(" and ").forEach(element_and => {all_fluents.add(make_positive(element_and))
+            element.condition.forEach(element_and => {all_fluents.add(make_positive(element_and))
             });
         }});
-    
+
+    // get fluents from always
+    program.domain_constraints.forEach(constraint => {constraint.split(/ and | or | -> /).forEach(fluent => {all_fluents.add(make_positive(fluent))});});
+
+    // get fluents from after
+    program.value_statements.forEach(after => {after.fluent.forEach(fluent => {all_fluents.add(make_positive(fluent))});});
+
     // create all possible subsets
     var all_fluent_subsets = getAllSubsets(Array.from(all_fluents))
     all_fluent_subsets.forEach(subset => {all_fluents.forEach(fluent => {
@@ -268,7 +275,6 @@ function get_all_states(program){
     });});
     all_fluent_subsets.forEach(element => {element.sort(endComparator)});
     //console.log(all_fluent_subsets)
-    // TODO: is initial state subset of every state
     return [all_fluent_subsets,all_fluents]
 }
 
