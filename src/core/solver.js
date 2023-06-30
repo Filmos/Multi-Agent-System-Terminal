@@ -20,6 +20,7 @@ function preprocess(program) {
         exec.effect = exec.effect.split(",").map((x) => x.trim()).filter(x => x.length > 0)
         if (exec.condition)
             exec.condition = exec.condition.split(",").map((x) => x.trim()).filter(x => x.length > 0)
+        exec.agents = new Set(exec.agents.split(",").map((x) => x.trim()).filter(x => x.length > 0))
     })
     return program
 }

@@ -15,7 +15,7 @@ define("app/syntax_highlight_rules", ["require", "exports", "module", "ace/lib/o
                 { token: ["text", "entity.name.function"], regex: "(^|\\W)([A-Z][A-Z_]*)(?=\\W|$)" }
             ],
             "agents": [
-                { token: "storage.type", regex: "[a-z]+" },
+                { token: "storage.type", regex: "[a-z_]+" },
                 { token: "text", regex: "$|}", next: "start" }
             ]
         };
