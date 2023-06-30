@@ -7,9 +7,9 @@ const { formatProgram, accelarateCodeParse } = require("app/main")
 const { fillDropdowns } = require("./src/app/dropdown_panel.js")
 const { renderGraph } = require('./src/app/graph_rendering.js')
 
-function setProgram(p) {
+function setProgram(p, format = true) {
     program = p
-    formatProgram(p)
+    if (format) formatProgram(p)
     fillDropdowns(p)
 }
 

@@ -73,24 +73,17 @@
                 <p class="editor-locator"></p>
             </div>
             <div class="panel panel-horizontal">
-                <div class="input-group mb-3" id="query-selector">
-                    <select class="form-select" id="query-tag">
-                        <option selected value=""></option>
-                        <option value="necessary">necessary</option>
-                        <option value="possibly">possibly</option>
-                    </select>
+                <div class="input-group mb-3 query-selector" id="query-selector-program">
+                    <span class="input-group-text">Π = </span>
+                    <input type="text" class="form-control" id="query-program">
+                </div>
+                <div class="input-group mb-3 query-selector" id="query-selector">
                     <input type="text" class="form-control" id="query-target">
-                    <select class="form-select" id="query-target-type">
-                        <option selected value="(fluent)">(fluent)</option>
-                        <option value="active">active</option>
-                        <option value="indispensable">indispensable</option>
+                    <select class="form-select" id="query-type">
+                        <option selected value="fluent">after Π</option>
+                        <option value="active">active in Π</option>
+                        <option value="indispensable">indispensable in Π</option>
                     </select>
-                    <span class="input-group-text">in Π</span>
-                    <select disabled class="form-select" id="query-from-tag">
-                        <option selected value=""></option>
-                        <option value="from">from</option>
-                    </select>
-                    <input disabled type="text" class="form-control" id="query-from">
                     <button type="button" id="query-button" class="btn btn-secondary">?</button>
                 </div>
                 <div id="query-result"></div>

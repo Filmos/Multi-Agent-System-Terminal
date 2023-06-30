@@ -1,3 +1,10 @@
+class InvalidQueryException extends Error {
+    constructor(message) {
+        super(message);
+        this.name = this.constructor.name;
+    }
+}
+
 function preprocess(program) {
     program = { ...program }
 
@@ -19,10 +26,11 @@ function preprocess(program) {
 
 function solve(program, query) {
     program = preprocess(program)
+    throw new InvalidQueryException("No target specified")
     console.log(program, query)
     
 
-    if (!query.target.fluent && !query.target.agent) throw new Error("No target specified")
+    if (!query.target.fluent && !query.target.agent) throw new InvalidQueryException("No target specified")
     // TODO @Alu: Implement this
     states_fluents=get_all_states(program)
     console.log(states_fluents)
@@ -361,4 +369,4 @@ function make_edge(program, fluents, state, agents, action){
 
     return [{from:state.join(", "),to:out_state.join(", "),label:action+" "+agents.join(", ")},condition]
 }
-module.exports = {solve, makeGraph}
+module.exports = { solve, makeGraph }

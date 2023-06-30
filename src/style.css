@@ -28,7 +28,7 @@
 }
 
 .panel-container.with-query {
-    height: calc(100vh - var(--gutter-size) * (1 + 2 * var(--spacer-size)) - 5.5rem - 3.45rem);
+    height: calc(100vh - var(--gutter-size) * (1 + 2 * var(--spacer-size)) - 7.5rem - 3.45rem);
 }
 
 
@@ -71,7 +71,7 @@
 }
 
 .panel-horizontal {
-    height: 5.5rem;
+    height: 7.5rem;
     border-bottom-left-radius: var(--rounding);
     border-bottom-right-radius: var(--rounding);
     display: flex;
@@ -86,7 +86,13 @@
     margin-bottom: 0 !important;
 }
 
-#query-selector.input-group>.form-select {
+#query-selector-program.input-group {
+    width: calc(100% - 1rem);
+    max-width: 80rem;
+    margin-bottom: 0.2rem !important;
+}
+
+.query-selector.input-group>.form-select {
     flex-grow: 0;
     width: fit-content;
 }
