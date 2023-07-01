@@ -25,6 +25,20 @@ function preprocess(program) {
     return program
 }
 
+function preprocess_program(query){
+    const pattern = /\((\w+),\s*\{\s*([^{}]+)\s*\}\s*\)/g;
+    const matches = query.matchAll(pattern);
+    const result = [];
+  
+    for (const match of matches) {
+      const action = match[1];
+      const agent = match[2].split(",").map((x) => x.trim()).filter(x => x.length > 0);
+      result.push({ action, agent });
+    }
+  
+    return result;
+  }
+
 function solve(program, query) {
     program = preprocess(program)
     //throw new InvalidQueryException("No target specified")
@@ -36,7 +50,8 @@ function solve(program, query) {
     // TODO @Alu: Implement this
     states_fluents=get_all_states(program)
     agents=get_all_agents(program)
-    console.log(agents)
+    actions=get_all_actions(program)
+    console.log(preprocess_program(query.actions))
     return 42
     var states = states_fluents[0]
     var fluents = states_fluents[1]
@@ -208,16 +223,16 @@ function makeGraph(program) {
             edges.push(edge)}
     });});});
     return {
-        nodes: nodes,
-        edges: edges
-        //[
-            // { from: "a", to: "b", label: "KILL by hunter" },
-            // { from: "a", to: "c", label: "RUN by deer" },
-            // { from: "c", to: "b", label: "KILL by hunter" },
-            // { from: "c", to: "b", label: "KILL by hunter" },
-            // { from: "c", to: "b", label: "KILL by hunter" },
-            // { from: "c", to: "a", label: "STOP by deer" },
-        //]
+        nodes: {a:'a',b:'b',c:'c'},
+        edges: 
+        [
+            { from: "a", to: "b", label: "KILL by hunter" },
+            { from: "a", to: "c", label: "RUN by deer" },
+            { from: "c", to: "b", label: "KILL by hunter" },
+            { from: "c", to: "b", label: "KILL by hunter" },
+            { from: "c", to: "b", label: "KILL by hunter" },
+            { from: "c", to: "a", label: "STOP by deer" },
+        ]
     }
 }
 
@@ -274,23 +289,50 @@ function get_all_states(program){
             subset.push(make_negative(fluent))
         }
     });});
+
+    // always
     all_fluent_subsets.forEach(element => {element.sort(endComparator)});
-    //console.log(all_fluent_subsets)
+    constraints = new Set()
+    program.domain_constraints.forEach(element => {
+        tmp = element.replace(' and ', " && ").replace(' or ', " || ")
+        if (tmp.includes("->")){
+            tmp=tmp.split("->")
+            tmp="!("+tmp[0]+")"+" || "+tmp[1]
+        }
+        constraints.add(tmp)
+    });
+    all_fluent_subsets=all_fluent_subsets.filter(subset => {
+        tmp = true
+        constraints.forEach(constraint => {
+            tmp_constraint = constraint
+            subset.forEach(fluent => {
+                if(subset.includes(make_negative(fluent))){
+                    tmp_constraint=tmp_constraint.replace(make_negative(fluent),'true')
+                    tmp_constraint=tmp_constraint.replace(make_positive(fluent),'false')
+                }
+                else{
+                    tmp_constraint=tmp_constraint.replace(make_negative(fluent),'false')
+                    tmp_constraint=tmp_constraint.replace(make_positive(fluent),'true')
+            }  
+            });
+            tmp_constraint = eval(tmp_constraint)
+            tmp = (tmp && tmp_constraint)
+        })
+        return tmp
+    })
     return [all_fluent_subsets,all_fluents]
 }
 
 function get_all_agents(program){
-    all_agents = new Set()
+    program_agents = new Set()
 
-    // get agents from action_rules
-    program.action_rules.forEach(action => {action.agents.split(', ').forEach(agent => {all_agents.add(agent)});});
+    // get agents from actions
+    program.action_rules.forEach(action => {action.agents.forEach(agent => {program_agents.add(agent)});});
 
-    // get agents from action_execution
-    program.action_execution.forEach(action => {action.agents.forEach(agent => {all_agents.add(agent)});});
-    all_agents = Array.from(all_agents)
-    all_agents_subsets = getAllSubsets(all_agents)
-    all_agents_subsets = all_agents_subsets.filter(element => element.length!=0)
-    //console.log(all_agents_subsets)
+    // get agents from after
+    program.value_statements.forEach(statement => {statement.agents.forEach(agent => agent.forEach(element => {program_agents.add(element)}));});
+
+    all_agents_subsets = getAllSubsets(Array.from(program_agents))
     
     //TODO: agents from value statements
     return all_agents_subsets
@@ -311,24 +353,15 @@ function arrayRemove(arr, value) {
 }
 
 function make_edge(program, fluents, state, agents, action){
-    // prohibition
-    for (let index = 0; index < program.prohibitions.length; index++) {
-
-        let intersection = new Set([...new Set(program.prohibitions[index].agents.split(', '))].filter(x => new Set(agents).has(x)));
-        if (program.prohibitions[index].action==action && intersection.size!=0) {
-            return
-            //return {from:state.join(", "),to:state.join(", "),label:action+" "+agents.join(", ")}
-        }
-    }
-
+    //console.log(fluents, state, agents, action)
     agent_subset_count=0
-    choosen_action = null
+    choosen_actions = new Array()
     for (let index = 0; index < program.action_rules.length; index++) {
-
-        needed_agents = new Set(program.action_rules[index].agents.split(', '))
+        needed_agents = program.action_rules[index].agents
         let intersection = new Set([...needed_agents].filter(x => new Set(agents).has(x)));
         condition = program.action_rules[index].condition
         if(typeof condition !== 'undefined'){
+            condition=condition.join(' && ')
             fluents.forEach(fluent => {
                 if(state.includes("-"+fluent)){
                     condition=condition.replace("-"+fluent,'true')
@@ -339,41 +372,46 @@ function make_edge(program, fluents, state, agents, action){
                     condition=condition.replace(fluent,'true')
             }   
             });
-            condition=condition.replace("and",'&&')
-            condition=condition.replace("or",'||')
             condition=eval(condition)
-            
         }
         else{
             condition=true
         }
-
-        if(program.action_rules[index].action==action && 
-            intersection.size==needed_agents.size && condition && intersection.size>agent_subset_count){
+        if(program.action_rules[index].action==action && intersection.size==needed_agents.size && condition){
+            if(intersection.size=agent_subset_count){
                 agent_subset_count=intersection.size
-                choosen_action=program.action_rules[index]
+                choosen_actions.push(program.action_rules[index])
+            }
+            else if(intersection.size>agent_subset_count){
+                agent_subset_count=intersection.size
+                choosen_actions=new Array([program.action_rules[index]])
+            }
         }
     }
-    out_state=state
-    //console.log(choosen_action)
-    if (choosen_action == null){
-        return [{from:state.join(", "),to:state.join(", "),label:action+" "+agents.join(", ")},false]
-    }
-    choosen_action.effect.forEach(effect => {
-        out_state=arrayRemove(out_state,make_positive(effect))
-        out_state=arrayRemove(out_state,make_negative(effect))
-        out_state.push(effect)
-    });
+    console.log(state, agents, choosen_actions)
+    // TODO check czy choosen_actions  nie mają przeciwnych efektów
 
-    program.noninertial_rules_fluents.forEach(rule => {
-        if (out_state.includes(rule.condition)){
-            out_state=arrayRemove(out_state,make_positive(rule.fluent))
-            out_state=arrayRemove(out_state,make_negative(rule.fluent))
-            out_state.push(rule.fluent)
-        }
-    });
-    out_state=out_state.sort(endComparator)
+    
+    // out_state=state
+    // //console.log(choosen_action)
+    // if (choosen_action == null){
+    //     return [{from:state.join(", "),to:state.join(", "),label:action+" "+agents.join(", ")},false]
+    // }
+    // choosen_action.effect.forEach(effect => {
+    //     out_state=arrayRemove(out_state,make_positive(effect))
+    //     out_state=arrayRemove(out_state,make_negative(effect))
+    //     out_state.push(effect)
+    // });
 
-    return [{from:state.join(", "),to:out_state.join(", "),label:action+" "+agents.join(", ")},condition]
+    // program.noninertial_rules_fluents.forEach(rule => {
+    //     if (out_state.includes(rule.condition)){
+    //         out_state=arrayRemove(out_state,make_positive(rule.fluent))
+    //         out_state=arrayRemove(out_state,make_negative(rule.fluent))
+    //         out_state.push(rule.fluent)
+    //     }
+    // });
+    // out_state=out_state.sort(endComparator)
+
+    // return [{from:state.join(", "),to:out_state.join(", "),label:action+" "+agents.join(", ")},condition]
 }
 module.exports = { solve, makeGraph }
