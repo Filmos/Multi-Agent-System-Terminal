@@ -27,16 +27,22 @@ function preprocess(program) {
 
 function preprocess_program(query){
     const pattern = /\((\w+),\s*\{\s*([^{}]*)\s*\}\s*\)/g;
-    const matches = query.matchAll(pattern);
+    const matches = query.actions.matchAll(pattern);
     const result = [];
+    const actions = [];
+    const agents = [];
   
     for (const match of matches) {
       const action = match[1];
       const agent = match[2].split(",").map((x) => x.trim()).filter(x => x.length > 0);
       result.push({action, agent});
     }
-    
-    return result;
+    result.forEach(action => {
+        actions.push(action.action)
+        agents.push(new Set(action.agent))
+    })
+    better_result = {actions:actions, agents:agents, fluent:[query.target]}
+    return better_result;
   }
 
 function solve(program, query) {
@@ -46,168 +52,146 @@ function solve(program, query) {
     states_fluents=get_all_states(program)
     agents=get_all_agents(program)
     actions=get_all_actions(program)
-    query_tmp = preprocess_program(query.actions)
+    query_tmp = preprocess_program(query)
     console.log(program, query, query_tmp)
     var states = states_fluents[0]
     var fluents = states_fluents[1]
+    inconsistent = false
 
-    potential_innitial_states = []
+    potential_initial_states = []
     states.forEach(state => {
         if(eqSet(new Set([...state].filter(x => program.initial_state.has(x))),program.initial_state)){
-            potential_innitial_states.push(state)
+            potential_initial_states.push(state)
         }
     })
-    potential_innitial_states
+    initial_states = []
+    potential_initial_states.forEach(state => {
+        flag = true
+        program.value_statements.forEach(statement => {
+            current_state=state
+            console.log(statement.actions)
+            for(let index = 0; index < statement.actions.length; index++){
+                edge = make_edge(program,fluents,current_state,new Array(...statement.agents[index]),statement.actions[index],states)
+                console.log(edge[0])
+                console.log('-------------')
+                if(typeof edge == 'undefined'){
+                    
+                }else if(edge[0]==null){
+                    flag = false
+                    inconsistent = true
+                    break
+                }
+                else{
+                    current_state=edge[0].to.split(', ')
+                }
+            }
+            if(!statement.fluent.every(val => current_state.includes(val))){
+                flag=false
+            }
+        })
+        if (inconsistent){return true}
+        if(flag){
+            initial_states.push(state)
+        }
+    })
+    console.log(initial_states)
+    if(query.type=="fluent"){
+        flag = true
+        initial_states.forEach(state => {
+            tmp = new Array(query_tmp)
+            tmp.forEach(statement => {
+                current_state=state
+                for(let index = 0; index < statement.actions.length; index++){
+                    edge = make_edge(program,fluents,current_state,new Array(...statement.agents[index]),statement.actions[index],states)
+                    if(typeof edge == 'undefined'){
+                        
+                    }else if(edge[0]==null){
+                        flag = false
+                        inconsistent = true
+                    }
+                    else{
+                        current_state=edge[0].to.split(', ')
+                    }
+                }
+                if(!statement.fluent.every(val => current_state.includes(val))){
+                    flag=false
+                }
+            })
+        })
+        if (inconsistent){return true}
+        return flag
+    }else{
+        flag=true
+        initial_states.forEach(state => {
+            flag2=false
+            tmp = new Array(query_tmp)
+            tmp.forEach(statement => {
+                current_state=state
+                for(let index = 0; index < statement.actions.length; index++){
+                    edge = make_edge(program,fluents,current_state,new Array(...statement.agents[index]),statement.actions[index],states)
+                    if(typeof edge == 'undefined'){
+                        
+                    }else if(edge[0]==null){
+                        flag = false
+                        inconsistent = true
+                    }
+                    else{
+                        current_state=edge[0].to.split(', ')
+                        if(statement.agents[index].has(query.target)){flag2=true}
+                    }
+                }
+            })
+            if(!flag2){
+                flag=false
+            }
+        })
+        if (inconsistent){return true}
+        if(query.type=="active" || (!flag && query.type=="indispensible")){
+            return flag
+        }
+        flag=true
+        initial_states.forEach(state => {
+            tmp = new Array(query_tmp)
+            tmp.forEach(statement => {
+                current_state=state
+                for(let index = 0; index < statement.actions.length; index++){
+                    edge = make_edge(program,fluents,current_state,new Array(...statement.agents[index]),statement.actions[index],states)
+                    if(typeof edge == 'undefined'){
+                        
+                    }else if(edge[0]==null){
+                        flag = false
+                        inconsistent = true
+                    }
+                    else{
+                        current_state=edge[0].to.split(', ')
+                    }
+                }
+                end_state=current_state
+                current_state=state
+                for(let index = 0; index < statement.actions.length; index++){
+                    tmp_agents = statement.agents[index]
+                    tmp_agents.delete(query.target)
+                    edge = make_edge(program,fluents,current_state,new Array(...tmp_agents),statement.actions[index],states)
+                    if(typeof edge == 'undefined'){
+                        
+                    }else if(edge[0]==null){
+                        flag = false
+                        inconsistent = true
+                    }
+                    else{
+                        current_state=edge[0].to.split(', ')
+                    }
+                }
+                if(end_state.every(val => current_state.includes(val))){
+                    flag=false
+                }
 
-
-    return false
-    var final_score = 0
-
-    console.log(program, query)
-    if (query.tag=='') {
-        initial_state = Array.from(program.initial_state);
-        fluents.forEach(fluent => {
-        if(!initial_state.includes(fluent)){
-            initial_state.push(make_negative(fluent))
-        }
-    });
-    initial_state = new Array(initial_state.sort(endComparator))
-    } 
-    else {
-        if (typeof query.from === 'undefined' || query.from == '') {
-            initial_state = states
-        } 
-        else {
-            fixed_fluents = query.from.split(', ')
-            unfixed_fluents = new Array()
-            fluents.forEach(fluent => {if (!fixed_fluents.includes(fluent) && !fixed_fluents.includes(make_negative(fluent))) {unfixed_fluents.push(fluent)}});
-            initial_state = getAllSubsets(unfixed_fluents).map(state => state.concat(fixed_fluents));
-            initial_state.forEach(state => {fluents.forEach(fluent => {
-                if (!state.includes(fluent) && !state.includes(make_negative(fluent))) {
-                    state.push(make_negative(fluent))
-                }});});
-            initial_state.forEach(state => {state.sort(endComparator)});
-        }
+            })
+        })
+        if (inconsistent){return true}
+        return flag
     }
-    edges = new Array()
-    edges_no_agent = new Array()
-    final_states = new Array()
-    final_labels = new Array()
-    if (query.target.type == "fluent"){
-        console.log(initial_state)
-        initial_state.forEach(state => {program.action_execution.forEach(exec => {
-            edge = make_edge(program,fluents,state,exec.agents,exec.action)
-            if(typeof edge !== 'undefined'){
-                edge=edge[0]
-                edges.push(edge)
-                state = edge.to.split(', ')
-            }
-            if (exec==program.action_execution[program.action_execution.length - 1]) {
-                final_states.push(edges[edges.length - 1].to.split(', '))
-            }
-        });});
-        final_states.forEach(state => {
-            if (state.includes(query.target.fluent)) {
-                final_score+=1
-        }});
-        final_score = final_score/final_states.length
-        console.log(edges)
-        if (query.tag=='' || query.tag=='necessary') {
-            return final_score==1
-        }
-        else{
-            return final_score>0
-        }
-    }
-    else if (query.target.type == "active") {
-        console.log(initial_state)
-        initial_state.forEach(state => {
-            flag = false
-            program.action_execution.forEach(exec => {
-            edge = make_edge(program,fluents,state,exec.agents,exec.action)
-            if(typeof edge !== 'undefined'){
-                edges.push(edge[0])
-                console.log(edge)
-                state = edge[0].to.split(', ')
-                if (edge[0].label.includes(query.target.agent) && edge[1]==true) {
-                    flag=true
-                }
-            }
-            });
-            if (flag) {
-                flag = false
-                final_score+=1
-            }});
-        console.log(final_score)
-        final_score = final_score/initial_state.length
-        console.log(edges)
-        if (query.tag=='' || query.tag=='necessary') {
-            return final_score==1
-        }
-        else{
-            return final_score>0
-        }
-    } else {
-        active_array = new Array()
-        is_active=false
-        console.log(initial_state)
-        initial_state.forEach(state => {
-            flag = false
-            program.action_execution.forEach(exec => {
-            edge = make_edge(program,fluents,state,exec.agents,exec.action)
-            if(typeof edge !== 'undefined'){
-                edges.push(edge[0])
-                console.log(edge)
-                state = edge[0].to.split(', ')
-                if (edge[0].label.includes(query.target.agent) && edge[1]==true) {
-                    flag=true
-                }
-            }
-            });
-            active_array.push(flag)
-            if (flag) {
-                flag = false
-                final_score+=1
-            }});
-        initial_state.forEach(state => {
-            flag = false
-            program.action_execution.forEach(exec => {
-            edge = make_edge(program,fluents,state,exec.agents.filter(agent => agent!=query.target.agent),exec.action)
-            if(typeof edge !== 'undefined'){
-                edges_no_agent.push(edge[0])
-                console.log(edge)
-                state = edge[0].to.split(', ')
-                if (edge[0].label.includes(query.target.agent) && edge[1]==true) {
-                    flag=true
-                }
-            }
-            });
-            if (flag) {
-                flag = false
-                final_score+=1
-            }});
-            console.log(active_array)
-            console.log(edges)
-            console.log(edges_no_agent)
-            final_score=0
-            counter=0
-            for (let index = program.action_execution.length-1; index < edges.length; index=index+program.action_execution.length) {
-                console.log(edges[index],edges_no_agent[index],active_array[counter])
-                if(edges[index].to != edges_no_agent[index].to && active_array[counter]){
-                    final_score+=1
-                }
-                counter+=1
-            }
-            
-            final_score=final_score/initial_state.length
-            console.log(final_score)
-            if (query.tag=='' || query.tag=='necessary') {
-                return final_score==1
-            }
-            else{
-                return final_score>0
-            }
-    }
+    return true
 }
 
 function makeGraph(program) {
