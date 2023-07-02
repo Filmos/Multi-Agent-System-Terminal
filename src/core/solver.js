@@ -12,7 +12,7 @@ function preprocess(program) {
     program.value_statements.forEach(exec => {
         exec.fluent = exec.fluent.split(",").map((x) => x.trim()).filter(x => x.length > 0)
         exec.actions = exec.actions.split(",").map((x) => x.trim()).filter(x => x.length > 0)
-        exec.agents = exec.agents.split("}").map((x) => new Set(x.split(/[{,]/).map(y => y.trim()).filter(y => y.length > 0))).filter(x => x.size > 0)
+        exec.agents = exec.agents.split("}").filter(x => x.trim().length > 0).map((x) => new Set(x.split(/[{,]/).map(y => y.trim()).filter(y => y.length > 0)))
     })
 
     program.action_rules = JSON.parse(JSON.stringify(program.action_rules))
